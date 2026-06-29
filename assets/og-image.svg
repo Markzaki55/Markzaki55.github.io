@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="glow" cx="22%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="#E8A33D" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#E8A33D" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#17181a" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="#0b0c0d"/>
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.6"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- monogram -->
+  <rect x="80" y="80" width="96" height="96" rx="18" fill="#121315" stroke="#202225"/>
+  <text x="128" y="128" text-anchor="middle" dominant-baseline="central"
+        font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="44" font-weight="700" fill="#E8A33D">MZ</text>
+
+  <!-- eyebrow -->
+  <text x="80" y="258" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="22" letter-spacing="6" fill="#9a9b95">GAMEPLAY · MULTIPLAYER SYSTEMS</text>
+
+  <!-- name -->
+  <text x="78" y="372" font-family="Sora, -apple-system, sans-serif"
+        font-size="112" font-weight="800" letter-spacing="-3" fill="#ECECE7">Mark Zaki</text>
+
+  <!-- tagline -->
+  <text x="82" y="450" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="30" fill="#E8A33D">Server-authoritative netcode · Souls-like combat · Modular C# systems</text>
+
+  <!-- footer line -->
+  <rect x="80" y="540" width="1040" height="1" fill="#17181a"/>
+  <text x="80" y="582" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="22" fill="#62635e">Unity · C# · Photon PUN · Fishnet · Animation Rigging</text>
+</svg>

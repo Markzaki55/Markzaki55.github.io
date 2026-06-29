@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="12" fill="#0b0c0d"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="11.5" fill="none" stroke="#202225"/>
+  <text x="32" y="32" text-anchor="middle" dominant-baseline="central"
+        font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="30" font-weight="700" fill="#E8A33D" letter-spacing="0.5">MZ</text>
+</svg>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Projects — Mark Zaki</title>
+  <meta name="description" content="All projects by Mark Zaki — featured and archived gameplay, multiplayer, combat, and AI systems work.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <!-- Social link preview — replace https://YOUR-DOMAIN with your live URL -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Mark Zaki">
+  <meta property="og:title" content="All Projects — Mark Zaki">
+  <meta property="og:description" content="Featured and archived gameplay, multiplayer, combat, and AI systems work by Mark Zaki.">
+  <meta property="og:url" content="https://YOUR-DOMAIN/projects.html">
+  <meta property="og:image" content="https://YOUR-DOMAIN/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="All Projects — Mark Zaki">
+  <meta name="twitter:description" content="Featured and archived gameplay, multiplayer, combat, and AI systems work by Mark Zaki.">
+  <meta name="twitter:image" content="https://YOUR-DOMAIN/assets/og-image.svg">
+</head>
+<body data-page="projects">
+
+  <header class="site-head" id="site-head">
+    <div class="wrap site-head__inner">
+      <a class="brand" href="index.html" id="brand">
+        <span class="brand__mark">MZ</span>
+        <span class="brand__name">Mark <b>Zaki</b></span>
+      </a>
+      <nav class="nav" id="nav" aria-label="Primary">
+        <a href="index.html#work">Work</a>
+        <a href="projects.html" aria-current="page">All Projects</a>
+        <a href="index.html#stack">Stack</a>
+        <a href="index.html#contact" class="nav__touch">Get in touch</a>
+      </nav>
+      <a class="nav__cta" href="index.html#contact">
+        <span class="nav__cta-dot"></span> Get in touch
+      </a>
+      <button class="nav__toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="pagehead">
+      <div class="wrap">
+        <a class="back" href="index.html"><span class="arrow">←</span> Back to home</a>
+        <div class="section__head">
+          <span class="section__index">00</span>
+          <h1 class="pagehead__title">All Projects</h1>
+          <span class="section__line"></span>
+        </div>
+        <p class="pagehead__sub" id="proj-count"></p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="wrap">
+        <div class="projgroup" id="featured-group"></div>
+        <div class="projgroup" id="other-group"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" id="contact">
+    <div class="wrap footer__row">
+      <div class="footer__name">Mark <b>Zaki</b> — Gameplay & Multiplayer Systems</div>
+      <div class="footer__links" id="footer-links"></div>
+    </div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="render.js"></script>
+</body>
+</html>
