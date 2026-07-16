@@ -611,9 +611,10 @@
     }
     function download(name, text, mime){
       var blob = new Blob([text], {type: mime || "text/plain"});
-      var a = h("a",{href:URL.createObjectURL(blob), download:name});
+      var url = URL.createObjectURL(blob);
+      var a = h("a", {href: url, download: name});
       document.body.appendChild(a); a.click();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 200);
+      setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 200);
     }
     function renderPublish(){
       head("Publish", "Your edits live in this browser as a draft. To make them public, export data.js and commit it.");
