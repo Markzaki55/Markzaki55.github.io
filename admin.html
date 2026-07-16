@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="robots" content="noindex, nofollow">
   <title>Studio · Site Editor</title>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -127,6 +128,7 @@
       <span class="top__status" id="status">draft loaded</span>
       <span class="top__spacer"></span>
       <button id="btn-save">Save Draft</button>
+      <button id="btn-github">Save to GitHub</button>
       <button id="btn-preview-toggle">Hide preview</button>
       <button id="btn-open">Open live ↗</button>
       <button class="primary" id="btn-export">Export data.js</button>
@@ -201,6 +203,14 @@
     })();
 
     var statusEl, mainEl, previewFrame, previewPage, previewBox, savedTimer, prevTimer;
+    var GH_KEY = "mzGitHubSettings";
+    function loadGitHubSettings(){ try { return JSON.parse(localStorage.getItem(GH_KEY) || "null"); } catch(e){ return null; } }
+    function saveGitHubSettings(s){ localStorage.setItem(GH_KEY, JSON.stringify(s)); }
+    function utf8ToBase64(str){
+      var bytes = new TextEncoder().encode(str);
+      var bin = Array.from(bytes, function(b){ return String.fromCharCode(b); }).join("");
+      return btoa(bin);
+    }
     function setStatus(txt, ok){ if(!statusEl) return; statusEl.textContent = txt; statusEl.className = "top__status" + (ok?" saved":""); }
     function save(){
       localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
@@ -214,6 +224,54 @@
       if (!previewFrame || previewBox.classList.contains("hidden")) return;
       var base = previewPage.value;
       previewFrame.src = base + (base.indexOf("?")>-1?"&":"?") + "_=" + Date.now();
+    }
+
+    function saveToGitHub(){
+      var gh = loadGitHubSettings() || {};
+      if (!gh.token || !gh.owner || !gh.repo) {
+        alert("Configure GitHub token, owner, and repo in Settings first.");
+        current = "settings"; editing = null; render(); return;
+      }
+      var content = buildDataJs();
+      var b64 = utf8ToBase64(content);
+      var path = gh.path || "data.js";
+      var branch = gh.branch || "main";
+      var apiUrl = "https://api.github.com/repos/" + encodeURIComponent(gh.owner) + "/" + encodeURIComponent(gh.repo) + "/contents/" + path;
+
+      setStatus("saving to GitHub...");
+      fetch(apiUrl + "?ref=" + encodeURIComponent(branch), {
+        headers: { "Authorization": "token " + gh.token, "Accept": "application/vnd.github.v3+json" }
+      })
+      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); })
+      .then(function(res){
+        if (!res.ok && res.status !== 404) {
+          throw new Error(res.data.message || "GitHub error " + res.status);
+        }
+        var sha = res.status === 404 ? null : res.data.sha;
+        var body = { message: "Update data.js from admin panel", content: b64, branch: branch };
+        if (sha) body.sha = sha;
+        return fetch(apiUrl, {
+          method: "PUT",
+          headers: {
+            "Authorization": "token " + gh.token,
+            "Accept": "application/vnd.github.v3+json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+      })
+      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); })
+      .then(function(res){
+        if (!res.ok) throw new Error(res.data.message || "GitHub PUT error " + res.status);
+        setStatus("saved to GitHub ✓", true);
+        clearTimeout(savedTimer); savedTimer = setTimeout(function(){ setStatus("draft active"); }, 3000);
+        alert("data.js committed to GitHub. It may take 1–2 minutes for GitHub Pages to update.");
+      })
+      .catch(function(err){
+        setStatus("GitHub save failed", false);
+        console.error(err);
+        alert("Failed to save to GitHub: " + err.message);
+      });
     }
 
     /* ---------- field builders ---------- */
@@ -585,10 +643,35 @@
       ]));
     }
 
-    /* ---------- SETTINGS (lock) ---------- */
+    /* ---------- SETTINGS (lock + GitHub) ---------- */
     function renderSettings(){
-      head("Settings", "Optional passphrase lock and editor info.");
+      head("Settings", "Optional passphrase lock and GitHub save setup.");
       var hasPass = !!localStorage.getItem(PASS_KEY);
+      var gh = loadGitHubSettings() || {};
+
+      mainEl.appendChild(h("div",{class:"note", html:
+        "<b>Save to GitHub.</b> With a personal access token, the <b>Save to GitHub</b> button commits <b>data.js</b> directly to your repo — no manual export needed. " +
+        "Create a token at GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic), with <b>repo</b> scope."}));
+
+      mainEl.appendChild(panel("GitHub save", [
+        field("GitHub owner", gh.owner || "", function(v){ gh.owner = v; }, {mono:true, placeholder:"MarkZaki"}),
+        field("Repository name", gh.repo || "", function(v){ gh.repo = v; }, {mono:true, placeholder:"MarkZaki.github.io"}),
+        field("Branch", gh.branch || "", function(v){ gh.branch = v; }, {mono:true, placeholder:"main"}),
+        field("File path", gh.path || "", function(v){ gh.path = v; }, {mono:true, placeholder:"data.js"}),
+        field("Personal access token", gh.token || "", function(v){ gh.token = v; }, {type:"password", mono:true, placeholder:"ghp_..."}),
+        h("button",{class:"add", text:"Save GitHub settings", on:{ click:function(){
+          if(!gh.owner || !gh.repo){ alert("Owner and repo are required."); return; }
+          saveGitHubSettings({
+            owner: gh.owner.trim(),
+            repo: gh.repo.trim(),
+            branch: (gh.branch || "main").trim(),
+            path: (gh.path || "data.js").trim(),
+            token: gh.token.trim()
+          });
+          alert("GitHub settings saved.");
+        }}})
+      ]));
+
       mainEl.appendChild(h("div",{class:"note", html:
         "<b>Note on the lock.</b> This is light deterrence for a static site — the passphrase is checked in your browser, so it is not real security. " +
         "If you want this editor truly private, don't deploy <b>admin.html</b> publicly (keep it local, or remove it before pushing). The site itself does not link to it."}));
@@ -628,6 +711,7 @@
         clearTimeout(savedTimer); savedTimer = setTimeout(function(){ setStatus("draft active"); }, 2000);
         refreshPreview();
       });
+      document.getElementById("btn-github").addEventListener("click", saveToGitHub);
       document.getElementById("btn-export").addEventListener("click", function(){ download("data.js", buildDataJs(), "text/javascript"); });
       document.getElementById("btn-open").addEventListener("click", function(){ window.open(previewPage.value || "index.html", "_blank"); });
       document.getElementById("preview-refresh").addEventListener("click", refreshPreview);

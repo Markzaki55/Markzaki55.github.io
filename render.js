@@ -79,12 +79,15 @@ function media(m) {
       return v;
     }
     case "youtube": {
+      if (!m.id) return el("div", "ph", `<span class="ph__sub">Missing YouTube ID</span>`);
       const f = document.createElement("iframe");
-      f.src = `https://www.youtube.com/embed/${m.id}?rel=0&modestbranding=1`;
-      try { f.src += `&origin=${encodeURIComponent(window.location.origin)}`; } catch (_) {}
-      f.title = m.label || "Video"; f.allowFullscreen = true;
-      f.allow = "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      f.frameBorder = "0";
+      f.src = `https://www.youtube-nocookie.com/embed/${m.id}`;
+      f.title = m.label || "Video";
+      f.allowFullscreen = true;
+      f.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
       f.referrerPolicy = "strict-origin-when-cross-origin";
+      f.loading = "eager";
       return f;
     }
     case "embed": {
