@@ -1,5 +1,5 @@
 /* =========================================================================
-   RENDER LOGIC — reads data.js, builds the pages.
+   RENDER LOGIC - reads data.js, builds the pages.
    You normally don't need to edit this file.
    ========================================================================= */
 
@@ -14,6 +14,54 @@ function esc(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 function isExternal(url) { return /^https?:/i.test(url); }
+
+/* ----------------------------------------------------------------------
+   DRAFT + THEME
+   The admin dashboard (admin.html) saves a working copy of the site data to
+   localStorage. If a draft exists we merge it over the data.js defaults, so
+   edits show up live in this browser before they are exported and committed.
+   ---------------------------------------------------------------------- */
+const DRAFT_KEY = "mzPortfolioDraft";
+
+function loadDraft() {
+  try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); }
+  catch (e) { return null; }
+}
+
+function hydrateFromDraft() {
+  const d = loadDraft();
+  if (!d) return;
+  if (d.PROFILE && typeof PROFILE !== "undefined") Object.assign(PROFILE, d.PROFILE);
+  if (d.THEME && typeof THEME !== "undefined") Object.assign(THEME, d.THEME);
+  if (Array.isArray(d.PROJECTS) && typeof PROJECTS !== "undefined") {
+    PROJECTS.length = 0;
+    d.PROJECTS.forEach((p) => PROJECTS.push(p));
+  }
+}
+
+/* Map THEME keys -> CSS custom properties, and apply them to :root. */
+const THEME_VARS = {
+  bg: "--bg", bg2: "--bg-2", surface: "--surface", surface2: "--surface-2",
+  line: "--line", lineSoft: "--line-soft", text: "--text", muted: "--muted",
+  faint: "--faint", accent: "--accent", accentSoft: "--accent-soft", accentDeep: "--accent-deep",
+};
+
+function hexToRgba(hex, a) {
+  const h = String(hex).replace("#", "");
+  const f = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const n = parseInt(f, 16);
+  if (isNaN(n) || f.length !== 6) return `rgba(232,163,61,${a})`;
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+}
+
+function applyTheme() {
+  if (typeof THEME === "undefined" || !THEME) return;
+  const root = document.documentElement.style;
+  Object.entries(THEME_VARS).forEach(([k, varName]) => {
+    if (THEME[k]) root.setProperty(varName, THEME[k]);
+  });
+  if (THEME.accent) root.setProperty("--glow", hexToRgba(THEME.accent, 0.1));
+}
 
 /* Build media element from a media object. */
 function media(m) {
@@ -32,9 +80,20 @@ function media(m) {
     }
     case "youtube": {
       const f = document.createElement("iframe");
-      f.src = `https://www.youtube.com/embed/${m.id}`;
-      f.title = "Video"; f.allowFullscreen = true;
+      f.src = `https://www.youtube.com/embed/${m.id}?rel=0&modestbranding=1`;
+      try { f.src += `&origin=${encodeURIComponent(window.location.origin)}`; } catch (_) {}
+      f.title = m.label || "Video"; f.allowFullscreen = true;
       f.allow = "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      f.referrerPolicy = "strict-origin-when-cross-origin";
+      return f;
+    }
+    case "embed": {
+      const f = document.createElement("iframe");
+      f.src = m.src;
+      f.title = m.title || m.label || "Embed"; f.allowFullscreen = true;
+      f.loading = "lazy";
+      f.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture";
+      f.referrerPolicy = "strict-origin-when-cross-origin";
       return f;
     }
     case "text":
@@ -43,6 +102,157 @@ function media(m) {
         `<span class="ph__label">${esc(m.label || "")}</span>` +
         (m.sub ? `<span class="ph__sub">${esc(m.sub)}</span>` : ""));
   }
+}
+
+/* ----------------------------------------------------------------------
+   MEDIA GALLERY (Unity Asset Store style)
+   A big main stage + a strip of clickable thumbnails. Featured item first.
+   ---------------------------------------------------------------------- */
+
+/* Build a small thumbnail preview for a media object. */
+function mediaThumb(m) {
+  switch (m.type) {
+    case "image": {
+      const img = document.createElement("img");
+      img.src = m.src; img.alt = m.alt || ""; img.loading = "lazy";
+      return img;
+    }
+    case "video": {
+      if (m.poster) {
+        const img = document.createElement("img");
+        img.src = m.poster; img.alt = m.label || ""; img.loading = "lazy";
+        return img;
+      }
+      return el("div", "thumb__ph", `<span>${esc(m.label || "Video")}</span>`);
+    }
+    case "youtube": {
+      const img = document.createElement("img");
+      img.src = `https://img.youtube.com/vi/${m.id}/hqdefault.jpg`;
+      img.alt = m.label || "Video"; img.loading = "lazy";
+      return img;
+    }
+    case "embed":
+      return el("div", "thumb__ph", `<span>${esc(m.label || m.title || "Embed")}</span>`);
+    case "text":
+    default:
+      return el("div", "thumb__ph", `<span>${esc(m.label || "Media")}</span>`);
+  }
+}
+
+const PLAY_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>';
+const EXPAND_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 9V4h5v2H6v3H4zm14 0V6h-3V4h5v5h-2zM6 15v3h3v2H4v-5h2zm12 0h2v5h-5v-2h3v-3z"/></svg>';
+
+function isPlayable(m) { return m.type === "video" || m.type === "youtube" || m.type === "embed"; }
+function mediaLabel(m, i) { return m.label2 || m.label || m.alt || (i != null ? `Media ${i + 1}` : ""); }
+
+/* featured item first, otherwise original order */
+function orderMedia(items) {
+  const fi = items.findIndex((m) => m.featured);
+  return fi > 0
+    ? [items[fi], ...items.slice(0, fi), ...items.slice(fi + 1)]
+    : items.slice();
+}
+
+function mediaGallery(items) {
+  const box = el("div", "mediabox");
+  box.tabIndex = 0;
+  const ordered = orderMedia(items);
+  let idx = 0;
+
+  const stage = el("div", "mediabox__stage");
+  const frame = el("div", "mediabox__frame");
+  const expand = el("button", "mediabox__expand", EXPAND_ICON);
+  expand.type = "button";
+  expand.setAttribute("aria-label", "Open fullscreen");
+  stage.appendChild(frame);
+  stage.appendChild(expand);
+
+  const cap = el("p", "mediabox__cap");
+  const thumbs = el("div", "mediabox__thumbs");
+
+  const goto = (n) => {
+    idx = (n + ordered.length) % ordered.length;
+    const m = ordered[idx];
+    frame.innerHTML = "";
+    frame.appendChild(media(m));
+    const label = mediaLabel(m);
+    cap.textContent = label;
+    cap.style.display = label ? "" : "none";
+    thumbs.querySelectorAll(".thumb").forEach((x, i) => x.classList.toggle("is-active", i === idx));
+  };
+
+  box.appendChild(stage);
+  box.appendChild(cap);
+
+  if (ordered.length > 1) {
+    ordered.forEach((m, i) => {
+      const t = el("button", "thumb");
+      t.type = "button";
+      t.setAttribute("aria-label", mediaLabel(m, i));
+      t.appendChild(mediaThumb(m));
+      if (isPlayable(m)) t.appendChild(el("span", "thumb__play", PLAY_ICON));
+      t.addEventListener("click", () => goto(i));
+      thumbs.appendChild(t);
+    });
+    box.appendChild(thumbs);
+  }
+
+  expand.addEventListener("click", () => openLightbox(ordered, idx));
+  box.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); goto(idx + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); goto(idx - 1); }
+  });
+
+  goto(0);
+  return box;
+}
+
+/* ----------------------------------------------------------------------
+   LIGHTBOX — fullscreen viewer with prev/next + keyboard control
+   ---------------------------------------------------------------------- */
+function openLightbox(items, startIndex) {
+  let i = startIndex || 0;
+
+  const ov = el("div", "lb");
+  const frame = el("div", "lb__frame");
+  const cap = el("p", "lb__cap");
+  const prev = el("button", "lb__nav lb__nav--prev", "‹");
+  const next = el("button", "lb__nav lb__nav--next", "›");
+  const close = el("button", "lb__close", "×");
+  [prev, next, close].forEach((b) => (b.type = "button"));
+  prev.setAttribute("aria-label", "Previous");
+  next.setAttribute("aria-label", "Next");
+  close.setAttribute("aria-label", "Close");
+
+  const single = items.length < 2;
+  if (single) { prev.style.display = "none"; next.style.display = "none"; }
+
+  const show = () => {
+    i = (i + items.length) % items.length;
+    frame.innerHTML = "";
+    frame.appendChild(media(items[i]));
+    const label = mediaLabel(items[i], i);
+    cap.textContent = single ? label : `${label}  ·  ${i + 1} / ${items.length}`;
+  };
+  const done = () => { document.removeEventListener("keydown", onKey); ov.remove(); };
+  const onKey = (e) => {
+    if (e.key === "Escape") done();
+    else if (e.key === "ArrowRight" && !single) { i++; show(); }
+    else if (e.key === "ArrowLeft" && !single) { i--; show(); }
+  };
+
+  prev.addEventListener("click", () => { i--; show(); });
+  next.addEventListener("click", () => { i++; show(); });
+  close.addEventListener("click", done);
+  ov.addEventListener("click", (e) => { if (e.target === ov) done(); });
+
+  ov.append(close, prev, frame, next, cap);
+  document.body.appendChild(ov);
+  document.addEventListener("keydown", onKey);
+  requestAnimationFrame(() => ov.classList.add("in"));
+  show();
 }
 
 function makeLink(text, url, cls) {
@@ -89,7 +299,7 @@ function observeReveals() {
    HOME
    ====================================================================== */
 function renderHome() {
-  document.title = `${PROFILE.name} — ${PROFILE.tagline}`;
+  document.title = `${PROFILE.name} · ${PROFILE.tagline}`;
   setBrand();
   document.getElementById("name").textContent = PROFILE.name;
   document.getElementById("intro").textContent = PROFILE.intro;
@@ -135,9 +345,13 @@ function renderHome() {
 
   // stack
   const stack = document.getElementById("stacklist");
-  PROFILE.stack.forEach((s) => stack.appendChild(el("span", null, esc(s))));
+  PROFILE.stack.forEach((s, idx) => {
+    const tag = el("span", null, esc(s));
+    tag.style.setProperty("--n", idx);
+    stack.appendChild(tag);
+  });
 
-  // projects — only featured ones on the home page
+  // projects - only featured ones on the home page
   const grid = document.getElementById("projects");
   const featured = PROJECTS.filter((p) => p.featured);
   featured.forEach((p) => grid.appendChild(projectCard(p)));
@@ -155,6 +369,7 @@ function projectCard(p) {
   const card = el("a", "pcard reveal" + (p.featured ? " pcard--featured" : ""));
   card.href = `project.html?id=${encodeURIComponent(p.id)}`;
   card.setAttribute("aria-label", p.title);
+  card.dataset.tags = (p.tags || []).map((t) => t.toLowerCase()).join("|");
 
   const m = el("div", "pcard__media");
   m.appendChild(media(p.cover));
@@ -176,7 +391,7 @@ function projectCard(p) {
    ====================================================================== */
 function renderProjects() {
   setBrand();
-  document.title = `All Projects — ${PROFILE.name}`;
+  document.title = `All Projects · ${PROFILE.name}`;
 
   const featured = PROJECTS.filter((p) => p.featured);
   const other = PROJECTS.filter((p) => !p.featured);
@@ -185,7 +400,7 @@ function renderProjects() {
   if (count) {
     const total = PROJECTS.length;
     count.textContent =
-      `${total} project${total === 1 ? "" : "s"} — ${featured.length} featured, ${other.length} archived`;
+      `${total} project${total === 1 ? "" : "s"} · ${featured.length} featured, ${other.length} archived`;
   }
 
   const fg = document.getElementById("featured-group");
@@ -204,7 +419,44 @@ function renderProjects() {
     og.appendChild(grid);
   }
 
+  buildProjectFilter();
   observeReveals();
+}
+
+/* Tag filter chips on the All Projects page. */
+function buildProjectFilter() {
+  const bar = document.getElementById("proj-filter");
+  if (!bar) return;
+
+  const seen = new Set();
+  const tags = [];
+  PROJECTS.forEach((p) => (p.tags || []).forEach((t) => {
+    const key = t.toLowerCase();
+    if (!seen.has(key)) { seen.add(key); tags.push(t); }
+  }));
+
+  const apply = (tag) => {
+    const norm = tag.toLowerCase();
+    bar.querySelectorAll(".chip").forEach((c) => c.classList.toggle("is-active", c.dataset.tag === tag));
+    document.querySelectorAll(".projgroup").forEach((group) => {
+      let shown = 0;
+      group.querySelectorAll(".pcard").forEach((card) => {
+        const match = tag === "All" || (card.dataset.tags || "").split("|").includes(norm);
+        card.style.display = match ? "" : "none";
+        if (match) shown++;
+      });
+      // hide a whole group (and its heading) when nothing in it matches
+      group.style.display = shown ? "" : "none";
+    });
+  };
+
+  ["All", ...tags].forEach((t, i) => {
+    const chip = el("button", "chip" + (i === 0 ? " is-active" : ""), esc(t));
+    chip.type = "button";
+    chip.dataset.tag = t;
+    chip.addEventListener("click", () => apply(t));
+    bar.appendChild(chip);
+  });
 }
 
 function groupHead(label, count) {
@@ -229,7 +481,7 @@ function renderProject() {
     root.appendChild(el("h1", "detail__title", "Project not found"));
     return;
   }
-  document.title = `${p.title} — ${PROFILE.name}`;
+  document.title = `${p.title} · ${PROFILE.name}`;
 
   root.appendChild(makeLink("← Back to projects", "index.html", "back"));
 
@@ -239,17 +491,18 @@ function renderProject() {
     root.appendChild(el("div", "detail__tags", p.tags.map((t) => `<span>${esc(t)}</span>`).join("")));
 
   const body = el("div", "detail__body");
-  const main = el("div");
+  const main = el("div", "detail__main");
 
-  const hero = el("div", "detail__hero");
-  hero.appendChild(media(p.hero || p.cover));
-  main.appendChild(hero);
-
-  // optional hero action links
-  if (p.links && p.links.length) {
-    const lw = el("div", "detail__links");
-    p.links.forEach((l) => lw.appendChild(makeLink(l.text, l.url, "btn" + (l.accent ? " btn--accent" : ""))));
-    main.appendChild(lw);
+  // Asset-store style gallery when a media[] array is present, otherwise a
+  // single hero frame from `hero` (falling back to the card cover).
+  if (p.media && p.media.length) {
+    const hero = el("div", "detail__hero detail__hero--gallery");
+    hero.appendChild(mediaGallery(p.media));
+    main.appendChild(hero);
+  } else {
+    const hero = el("div", "detail__hero");
+    hero.appendChild(media(p.hero || p.cover));
+    main.appendChild(hero);
   }
 
   (p.sections || []).forEach((sec) => {
@@ -287,6 +540,7 @@ function renderProject() {
 
   // info sidebar
   const info = el("aside", "info");
+  info.appendChild(el("div", "info__head", "Project Info"));
   [["Role", p.role], ["Timeline", p.timeline], ["Tech Stack", p.techStack]]
     .filter(([, v]) => v)
     .forEach(([label, val]) => {
@@ -295,13 +549,21 @@ function renderProject() {
       row.appendChild(el("div", "info__value", esc(val)));
       info.appendChild(row);
     });
+
+  // pull project action links into the sidebar too, so they're always visible
+  if (p.links && p.links.length) {
+    const row = el("div", "info__row info__row--links");
+    p.links.forEach((l) =>
+      row.appendChild(makeLink(l.text, l.url, "btn btn--block" + (l.accent ? " btn--accent" : ""))));
+    info.appendChild(row);
+  }
   body.appendChild(info);
 
   root.appendChild(body);
 }
 
 /* ======================================================================
-   CONTACT SECTION (home) — socials + message form
+   CONTACT SECTION (home) - socials + message form
    ====================================================================== */
 const SOCIAL_ICONS = {
   github:
@@ -363,7 +625,7 @@ function renderContact() {
     }
 
     const subject = `Portfolio message from ${name}`;
-    const body = `${msg}\n\n— ${name}\n${from}`;
+    const body = `${msg}\n\n- ${name}\n${from}`;
     const href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = href;
     setNote("Opening your email app… if nothing happens, email me directly at " + to, true);
@@ -383,16 +645,50 @@ function renderFooter() {
   add("LinkedIn", L.linkedin);
   add("Email", L.email);
   add("Resume", L.resume);
+
+  // copyright line
+  if (PROFILE.copyright) {
+    const copy = el("div", "footer__copy",
+      esc(PROFILE.copyright).replace(/\{year\}/g, new Date().getFullYear()));
+    f.closest(".footer").appendChild(copy);
+  }
+}
+
+/* ======================================================================
+   SCROLLSPY — highlight the in-view section in the header nav
+   ====================================================================== */
+function initScrollSpy() {
+  const links = [...document.querySelectorAll('.nav a[href*="#"]')];
+  const map = new Map();
+  links.forEach((a) => {
+    const id = (a.getAttribute("href") || "").split("#")[1];
+    const sec = id && document.getElementById(id);
+    if (sec) map.set(sec, a);
+  });
+  if (!map.size) return; // no on-page anchors (e.g. project pages)
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      links.forEach((a) => a.removeAttribute("aria-current"));
+      const a = map.get(en.target);
+      if (a) a.setAttribute("aria-current", "page");
+    });
+  }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+  map.forEach((_, sec) => io.observe(sec));
 }
 
 /* ======================================================================
    BOOT
    ====================================================================== */
 document.addEventListener("DOMContentLoaded", () => {
+  hydrateFromDraft();
+  applyTheme();
   if (document.body.dataset.page === "home") renderHome();
   if (document.body.dataset.page === "project") renderProject();
   if (document.body.dataset.page === "projects") renderProjects();
   renderContact();
   renderFooter();
   initMobileNav();
+  initScrollSpy();
 });
