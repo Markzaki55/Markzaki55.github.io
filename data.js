@@ -13,6 +13,8 @@ const PROFILE = {
     "AI Systems"
   ],
   "tagline": "Gameplay & Multiplayer Systems Engineer",
+  "heroTag": "Open to new projects & collaborations",
+  "footerTagline": "Always happy to talk game systems.",
   "about": "I'm a gameplay and multiplayer engineer based in Egypt. I care about how a hit feels, whether a fight is fair, and writing code that doesn't fall apart when the next feature shows up. I'd rather ship something solid than polish something forever.",
   "intro": "I build the systems underneath a game: server-authoritative multiplayer, Souls-like combat that feels responsive, and the kind of modular setup that lets you add a feature without breaking three others. Most of my work lives in Unity and C#, and I like turning rough gameplay ideas into clean systems other people can actually build on.",
   "stats": [
@@ -39,19 +41,19 @@ const PROFILE = {
   ],
   "pillars": [
     {
-      "title": "Multiplayer Architecture",
+      "title": "Server-Authoritative Multiplayer",
       "body": "Server-authoritative netcode with Photon PUN and Fishnet. Class switching, avatar rebinding, weapon reparenting, and state sync that holds together when more than a couple of players show up."
     },
     {
-      "title": "Combat Systems",
+      "title": "Combat Feel & Design",
       "body": "Souls-like and Sekiro-style combat: deflect and clash VFX, hitstop, charged attacks, stamina economies, and the small frame-level details that decide whether a hit feels good."
     },
     {
-      "title": "Enemy AI",
+      "title": "Enemy AI & Behaviors",
       "body": "Layered AI built on blackboards and ScriptableObject-driven roles and factions, with priority-based decision making, combat-ring slotting, and custom steering for enemies that fly."
     },
     {
-      "title": "Modular Architecture",
+      "title": "Clean, Modular Systems",
       "body": "SOLID, inspector-configured, ScriptableObject-heavy systems. Generic state machines, event channels, and assembly definitions, set up so the next feature drops in without disturbing the last one."
     }
   ],

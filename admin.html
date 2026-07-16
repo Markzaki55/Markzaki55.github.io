@@ -364,7 +364,7 @@
         wrap.appendChild(h("label",{class:"f"},[
           h("span",{class:"f__label",text:"YouTube link or ID"}),
           ytInput,
-          h("span",{class:"f__hint",text:"Paste the full link — the ID is extracted when you leave the field."})
+          h("span",{class:"f__hint",text:"Paste the full link. The ID is extracted when you leave the field."})
         ]));
         wrap.appendChild(field("Short label", m.label, function(v){ m.label=v; save(); }));
       } else if (m.type === "embed"){
@@ -373,7 +373,7 @@
       }
 
       if (opts.gallery){
-        wrap.appendChild(checkField("Featured — show this one first in the gallery", m.featured, function(c){
+        wrap.appendChild(checkField("Featured: show this one first in the gallery", m.featured, function(c){
           if (c) opts.list.forEach(function(x){ if(x!==m) x.featured=false; });
           m.featured = c; after();
         }));
@@ -420,6 +420,7 @@
       mainEl.appendChild(panel("Identity", [
         field("Name", P.name, function(v){ P.name=v; save(); }),
         field("Tagline", P.tagline, function(v){ P.tagline=v; save(); }, {placeholder:"Gameplay & Multiplayer Systems Engineer"}),
+        field("Hero tagline", P.heroTag, function(v){ P.heroTag=v; save(); }, {placeholder:"Open to new projects & collaborations", hint:"Shown below the availability dot in the hero."}),
         field("Rotating words (comma separated)", (P.roleWords||[]).join(", "), function(v){ P.roleWords=csvToList(v); save(); }, {mono:true, hint:"Cycles after 'Multiplayer ·' in the hero."}),
         field("Hero intro", P.intro, function(v){ P.intro=v; save(); }, {textarea:true, rows:4}),
         field("About (contact section)", P.about, function(v){ P.about=v; save(); }, {textarea:true, rows:3})
@@ -456,6 +457,7 @@
       ]));
 
       mainEl.appendChild(panel("Footer", [
+        field("Footer tagline", P.footerTagline || "", function(v){ P.footerTagline=v; save(); }, {placeholder:"Always happy to talk game systems."}),
         field("Copyright line", P.copyright || "", function(v){ P.copyright=v; save(); }, {placeholder:"© {year} Mark Zaki", hint:"Use {year} to insert the current year automatically."})
       ]));
     }
@@ -548,7 +550,7 @@
       // media gallery
       var media = p.media || (p.media=[]);
       var gbox = h("div");
-      if (!media.length) gbox.appendChild(h("div",{class:"note", html:"No gallery media yet. Add a featured video plus images/clips — they appear as a main viewer with a thumbnail strip on the project page (Unity Asset Store style)."}));
+      if (!media.length) gbox.appendChild(h("div",{class:"note", html:"No gallery media yet. Add a featured video plus images/clips. They appear as a main viewer with a thumbnail strip on the project page (Unity Asset Store style)."}));
       media.forEach(function(m,j){
         var item = h("div",{class:"sub"},[
           h("div",{class:"row"},[ h("div",{class:"f",style:"flex:1"},[ h("span",{class:"f__label",text:"Item "+(j+1)+(m.featured?" · featured":"")}) ]), rowTools(media,j,reRender) ]),
@@ -651,7 +653,7 @@
       var gh = loadGitHubSettings() || {};
 
       mainEl.appendChild(h("div",{class:"note", html:
-        "<b>Save to GitHub.</b> With a personal access token, the <b>Save to GitHub</b> button commits <b>data.js</b> directly to your repo — no manual export needed. " +
+        "<b>Save to GitHub.</b> With a personal access token, the <b>Save to GitHub</b> button commits <b>data.js</b> directly to your repo. No manual export needed. " +
         "Create a token at GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic), with <b>repo</b> scope."}));
 
       mainEl.appendChild(panel("GitHub save", [
@@ -674,10 +676,10 @@
       ]));
 
       mainEl.appendChild(h("div",{class:"note", html:
-        "<b>Note on the lock.</b> This is light deterrence for a static site — the passphrase is checked in your browser, so it is not real security. " +
+        "<b>Note on the lock.</b> This is light deterrence for a static site. The passphrase is checked in your browser, so it is not real security. " +
         "If you want this editor truly private, don't deploy <b>admin.html</b> publicly (keep it local, or remove it before pushing). The site itself does not link to it."}));
       mainEl.appendChild(panel("Passphrase lock", [
-        h("div",{class:"f__label", text: hasPass ? "A passphrase is currently set." : "No passphrase set — the editor opens freely."}),
+        h("div",{class:"f__label", text: hasPass ? "A passphrase is currently set." : "No passphrase set. The editor opens freely."}),
         field("Set / change passphrase", "", function(v){ window.__newpass = v; }, {type:"password", placeholder:"new passphrase"}),
         h("button",{class:"add", text:"Save passphrase", on:{ click:function(){
           if(!window.__newpass){ alert("Type a passphrase first."); return; }

@@ -401,6 +401,10 @@ function renderHome() {
   document.getElementById("name").textContent = PROFILE.name;
   document.getElementById("intro").textContent = PROFILE.intro;
 
+  // hero tagline
+  const heroTag = document.querySelector(".hero__tag");
+  if (heroTag && PROFILE.heroTag) heroTag.textContent = PROFILE.heroTag;
+
   // rotating role
   const rot = document.getElementById("rotator");
   let i = 0;
@@ -742,6 +746,11 @@ function renderFooter() {
   add("LinkedIn", L.linkedin);
   add("Email", L.email);
   add("Resume", L.resume);
+  f.appendChild(makeLink("Privacy Policy", "privacy-policy.html", ""));
+
+  // footer tagline
+  const ft = document.querySelector(".footer__tagline");
+  if (ft && PROFILE.footerTagline) ft.textContent = PROFILE.footerTagline;
 
   // copyright line
   if (PROFILE.copyright) {
