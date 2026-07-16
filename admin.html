@@ -126,6 +126,7 @@
       <span class="top__brand">Mark <b>Zaki</b> · Studio</span>
       <span class="top__status" id="status">draft loaded</span>
       <span class="top__spacer"></span>
+      <button id="btn-save">Save Draft</button>
       <button id="btn-preview-toggle">Hide preview</button>
       <button id="btn-open">Open live ↗</button>
       <button class="primary" id="btn-export">Export data.js</button>
@@ -180,7 +181,7 @@
     }
     function clone(o){ return JSON.parse(JSON.stringify(o)); }
     function slug(s){ return String(s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "project"; }
-    function parseYouTube(v){ if(!v) return ""; var m = String(v).match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{6,})/); return m ? m[1] : String(v).trim(); }
+    function parseYouTube(v){ if(!v) return ""; var s=String(v).trim(); var m=s.match(/(?:youtu\.be\/|v=|embed\/|shorts\/|live\/)([\w-]{6,})/); return m ? m[1] : s; }
 
     /* ---------- state ---------- */
     var DEFAULTS = {
@@ -293,7 +294,20 @@
         wrap.appendChild(field("Poster image (path/URL)", m.poster, function(v){ m.poster=v; save(); }, {placeholder:"assets/media/poster.png", mono:true}));
         wrap.appendChild(field("Short label", m.label, function(v){ m.label=v; save(); }));
       } else if (m.type === "youtube"){
-        wrap.appendChild(field("YouTube link or ID", m.id, function(v){ m.id = parseYouTube(v); save(); }, {placeholder:"https://youtu.be/VIDEO_ID", mono:true, hint:"Paste the full link — the ID is extracted automatically."}));
+        var ytInput;
+        var ytOnChange = function(e){
+          var id = parseYouTube(e.target.value);
+          m.id = id;
+          e.target.value = id;
+          save();
+        };
+        ytInput = h("input", {class:"in in--mono", type:"text", value: m.id || "", placeholder:"https://youtu.be/VIDEO_ID",
+          on: { change: ytOnChange, blur: ytOnChange }});
+        wrap.appendChild(h("label",{class:"f"},[
+          h("span",{class:"f__label",text:"YouTube link or ID"}),
+          ytInput,
+          h("span",{class:"f__hint",text:"Paste the full link — the ID is extracted when you leave the field."})
+        ]));
         wrap.appendChild(field("Short label", m.label, function(v){ m.label=v; save(); }));
       } else if (m.type === "embed"){
         wrap.appendChild(field("Embed URL (iframe src)", m.src, function(v){ m.src=v; save(); }, {placeholder:"https://itch.io/embed/123456", mono:true, hint:"itch.io, Sketchfab, Steam widget, etc."}));
@@ -608,6 +622,12 @@
       previewPage = document.getElementById("preview-page");
       previewBox = document.getElementById("preview");
 
+      document.getElementById("btn-save").addEventListener("click", function(){
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
+        setStatus("saved ✓", true);
+        clearTimeout(savedTimer); savedTimer = setTimeout(function(){ setStatus("draft active"); }, 2000);
+        refreshPreview();
+      });
       document.getElementById("btn-export").addEventListener("click", function(){ download("data.js", buildDataJs(), "text/javascript"); });
       document.getElementById("btn-open").addEventListener("click", function(){ window.open(previewPage.value || "index.html", "_blank"); });
       document.getElementById("preview-refresh").addEventListener("click", refreshPreview);
