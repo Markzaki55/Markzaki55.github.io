@@ -80,7 +80,8 @@ const PROFILE = {
     "C++",
     "VR / OpenXR",
     "Quest 3S"
-  ]
+  ],
+  "copyright": ""
 };
 
 const THEME = {
@@ -204,7 +205,7 @@ const PROJECTS = [
         "sub": "VR walkthrough video",
         "featured": true,
         "label2": "Walkthrough",
-        "id": "dQw4w9WgXcQ",
+        "id": "LKFkmpykXtw",
         "src": "https://youtu.be/LKFkmpykXtw"
       },
       {
