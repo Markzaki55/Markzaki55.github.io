@@ -438,7 +438,6 @@ function renderHome() {
   const pillars = document.getElementById("pillars");
   PROFILE.pillars.forEach((p, idx) => {
     const card = el("div", "pillar");
-    card.appendChild(el("div", "pillar__num", String(idx + 1).padStart(2, "0")));
     card.appendChild(el("div", "pillar__title", esc(p.title)));
     card.appendChild(el("div", "pillar__body", esc(p.body)));
     pillars.appendChild(card);
