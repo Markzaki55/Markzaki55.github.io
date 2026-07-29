@@ -1,7 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="12" fill="#0b0c0d"/>
-  <rect x="0.5" y="0.5" width="63" height="63" rx="11.5" fill="none" stroke="#202225"/>
-  <text x="32" y="32" text-anchor="middle" dominant-baseline="central"
-        font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
-        font-size="30" font-weight="700" fill="#E8A33D" letter-spacing="0.5">MZ</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-labelledby="title">
+  <title id="title">Mark Zaki</title>
+  <rect width="80" height="80" rx="10" fill="#0d0f12"/>
+  <g transform="translate(0 8)">
+    <path d="M4 44V12h7l11 14 11-14h7v32h-8V25L22 38 12 25v19H4Z"
+          fill="#f1f3f5"/>
+    <path d="M44 12h30v7L56 37h18v7H43v-7l18-18H44v-7Z"
+          fill="#f1f3f5"/>
+  </g>
 </svg>

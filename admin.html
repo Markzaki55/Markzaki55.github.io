@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="robots" content="noindex, nofollow">
-  <title>Studio · Site Editor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Studio | Site Editor</title>
+  <meta name="theme-color" content="#0d0f12">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Fira+Code:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&family=Sora:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&family=Source+Sans+3:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b0c0d; --panel:#121315; --panel2:#0d0e0f; --line:#202225; --line-soft:#17181a;
-      --text:#ECECE7; --muted:#9a9b95; --faint:#62635e; --accent:#E8A33D; --accent-deep:#a86c1f;
+      --bg:#0d0f12; --panel:#171b21; --panel2:#111419; --line:#2c323b; --line-soft:#222831;
+      --text:#f1f3f5; --muted:#a6acb5; --faint:#757d89; --accent:#d3a465; --accent-deep:#80603a;
       --ok:#7fb069; --warn:#e06b5e; --radius:8px; --mono:"JetBrains Mono",monospace; --sans:"Sora",system-ui,sans-serif;
     }
     *{box-sizing:border-box;margin:0;padding:0}
@@ -56,7 +58,7 @@
     .f__hint{display:block;font-size:11px;color:var(--faint);margin-top:5px}
     .in{width:100%;font-family:var(--sans);font-size:14px;color:var(--text);background:var(--bg);
       border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;line-height:1.5}
-    .in:focus{outline:none;border-color:var(--accent-deep);box-shadow:0 0 0 3px rgba(232,163,61,.1)}
+    .in:focus{outline:none;border-color:var(--accent-deep);box-shadow:0 0 0 3px rgba(211,164,101,.1)}
     textarea.in{resize:vertical;min-height:64px}
     .in--mono{font-family:var(--mono);font-size:13px}
     .row{display:flex;gap:12px;align-items:flex-end;margin-bottom:12px}
@@ -91,10 +93,6 @@
     .thumbprev{width:140px;aspect-ratio:16/10;object-fit:cover;border:1px solid var(--line);border-radius:6px;margin-top:8px;background:var(--bg)}
     .note{font-family:var(--mono);font-size:12px;color:var(--faint);background:var(--panel2);border:1px solid var(--line-soft);border-radius:8px;padding:12px 14px;margin-bottom:18px;line-height:1.6}
     .note b{color:var(--accent)}
-    .swatch{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-    .swatch input[type=color]{width:42px;height:34px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;cursor:pointer}
-    .swatch input[type=text]{width:110px;font-family:var(--mono);font-size:12px}
-    .swatch span{font-family:var(--mono);font-size:12px;color:var(--muted);width:130px}
     pre.export{white-space:pre-wrap;word-break:break-word;background:var(--panel2);border:1px solid var(--line);border-radius:8px;
       padding:14px;font-family:var(--mono);font-size:11px;max-height:320px;overflow:auto;color:var(--muted)}
 
@@ -108,6 +106,7 @@
     .lock__err{color:var(--warn);font-size:12px;min-height:1em;margin-top:8px}
     @media(max-width:1100px){ .shell{grid-template-columns:170px 1fr} .preview{display:none} }
   </style>
+  <link rel="stylesheet" href="admin.css">
 </head>
 <body>
 
@@ -124,14 +123,19 @@
 
   <div id="app" style="display:none">
     <div class="top">
-      <span class="top__brand">Mark <b>Zaki</b> · Studio</span>
-      <span class="top__status" id="status">draft loaded</span>
+      <span class="top__brand">
+        <img class="top__monogram" src="assets/mz-mark.svg" alt="" aria-hidden="true">
+        <span>Portfolio Studio</span>
+      </span>
+      <span class="top__status" id="status">Draft loaded</span>
       <span class="top__spacer"></span>
-      <button id="btn-save">Save Draft</button>
-      <button id="btn-github">Save to GitHub</button>
-      <button id="btn-preview-toggle">Hide preview</button>
-      <button id="btn-open">Open live ↗</button>
-      <button class="primary" id="btn-export">Export data.js</button>
+      <div class="top__actions">
+        <button id="btn-save">Save draft</button>
+        <button id="btn-github">Publish to GitHub</button>
+        <button id="btn-preview-toggle">Hide preview</button>
+        <button id="btn-open">Open site ↗</button>
+        <button class="primary" id="btn-export">Export data.js</button>
+      </div>
     </div>
 
     <div class="shell">
@@ -139,6 +143,7 @@
       <main class="main" id="main"></main>
       <section class="preview" id="preview">
         <div class="preview__bar">
+          <span class="preview__label">Live preview</span>
           <select class="in" id="preview-page">
             <option value="index.html">Home</option>
             <option value="projects.html">All Projects</option>
@@ -198,8 +203,39 @@
       state = draft && draft.PROFILE ? draft : clone(DEFAULTS);
       // make sure containers exist
       state.PROFILE = state.PROFILE || {};
-      state.THEME = state.THEME || clone(DEFAULTS.THEME);
+      state.THEME = Object.assign(clone(DEFAULTS.THEME), state.THEME || {});
       state.PROJECTS = state.PROJECTS || [];
+      if ((state.PROFILE.layoutVersion || 0) < DEFAULTS.PROFILE.layoutVersion) {
+        ["tagline", "intro", "about", "pillars", "stack", "footerTagline"].forEach(function(key){
+          state.PROFILE[key] = clone(DEFAULTS.PROFILE[key]);
+        });
+        state.PROFILE.layoutVersion = DEFAULTS.PROFILE.layoutVersion;
+      }
+      if ((state.PROFILE.expertiseVersion || 0) < (DEFAULTS.PROFILE.expertiseVersion || 0)) {
+        var expertiseReplacements = {
+          "Combat, AI & Character Systems": DEFAULTS.PROFILE.pillars[1],
+          "Technical Leadership & Developer Tools": DEFAULTS.PROFILE.pillars[3]
+        };
+        state.PROFILE.pillars = (state.PROFILE.pillars || []).map(function(pillar){
+          return expertiseReplacements[pillar.title] ? clone(expertiseReplacements[pillar.title]) : pillar;
+        });
+        state.PROFILE.expertiseVersion = DEFAULTS.PROFILE.expertiseVersion;
+      }
+      if ((state.PROFILE.projectDataVersion || 0) < DEFAULTS.PROFILE.projectDataVersion) {
+        state.PROJECTS = clone(DEFAULTS.PROJECTS);
+        state.PROFILE.projectDataVersion = DEFAULTS.PROFILE.projectDataVersion;
+      }
+      // Refresh known default palettes while preserving custom themes and font choices.
+      if (
+        (state.THEME.bg === "#0b0c0d" && state.THEME.accent === "#E8A33D") ||
+        (state.THEME.bg === "#0f100e" && state.THEME.accent === "#ff643f")
+      ) {
+        [
+          "bg", "bg2", "surface", "surface2", "line", "lineSoft",
+          "text", "muted", "faint", "accent", "accentSoft", "accentDeep",
+          "heroText", "headingText", "projectTitle", "bodyText"
+        ].forEach(function(key){ state.THEME[key] = DEFAULTS.THEME[key]; });
+      }
     })();
 
     var statusEl, mainEl, previewFrame, previewPage, previewBox, savedTimer, prevTimer;
@@ -265,7 +301,7 @@
         if (!res.ok) throw new Error(res.data.message || "GitHub PUT error " + res.status);
         setStatus("saved to GitHub ✓", true);
         clearTimeout(savedTimer); savedTimer = setTimeout(function(){ setStatus("draft active"); }, 3000);
-        alert("data.js committed to GitHub. It may take 1–2 minutes for GitHub Pages to update.");
+        alert("data.js committed to GitHub. It may take 1 to 2 minutes for GitHub Pages to update.");
       })
       .catch(function(err){
         setStatus("GitHub save failed", false);
@@ -382,13 +418,57 @@
       return wrap;
     }
 
+    function mediaItemThumb(m){
+      var box = h("span",{class:"media-item__thumb"});
+      var src = "";
+      if (m.type === "image" && m.src) src = m.src;
+      else if (m.type === "video" && m.poster) src = m.poster;
+      else if (m.type === "youtube" && m.id) src = "https://img.youtube.com/vi/" + m.id + "/mqdefault.jpg";
+
+      if (src) box.appendChild(h("img",{src:src, alt:""}));
+      else box.appendChild(h("span",{text:(m.type || "text").slice(0,3).toUpperCase()}));
+      return box;
+    }
+
+    function compactMediaItem(m, index, list){
+      var title = m.label2 || m.label || m.title || m.alt || "Untitled media";
+      var body = h("div",{class:"media-item__body", hidden:true},[
+        mediaEditor(m, reRender, {gallery:true, list:list})
+      ]);
+      var toggle = h("button",{
+        class:"media-item__toggle",
+        attrs:{type:"button","aria-expanded":"false"},
+        on:{click:function(){
+          var open = toggle.getAttribute("aria-expanded") === "true";
+          toggle.setAttribute("aria-expanded", open ? "false" : "true");
+          body.hidden = open;
+        }}
+      },[
+        mediaItemThumb(m),
+        h("span",{class:"media-item__identity"},[
+          h("span",{class:"media-item__index",text:"Item " + String(index + 1).padStart(2,"0")}),
+          h("strong",{class:"media-item__title",text:title}),
+          h("span",{class:"media-item__meta",text:(m.type || "text").toUpperCase()})
+        ]),
+        m.featured ? h("span",{class:"media-item__featured",text:"Featured"}) : null
+      ]);
+
+      return h("div",{class:"media-item"},[
+        h("div",{class:"media-item__bar"},[
+          toggle,
+          rowTools(list,index,reRender)
+        ]),
+        body
+      ]);
+    }
+
     /* ====================================================================
        TABS
        ==================================================================== */
     var TABS = [
       {id:"home",     label:"Home & Profile", render:renderHome},
       {id:"links",    label:"Links",          render:renderLinks},
-      {id:"theme",    label:"Theme & Colors", render:renderTheme},
+      {id:"theme",    label:"Visual System",  render:renderTheme},
       {id:"projects", label:"Projects",       render:renderProjects},
       {id:"publish",  label:"Publish",        render:renderPublish},
       {id:"settings", label:"Settings",       render:renderSettings}
@@ -414,30 +494,15 @@
 
     /* ---------- HOME & PROFILE ---------- */
     function renderHome(){
-      head("Home & Profile", "The hero, the about line, and the home-page sections.");
+      head("Home & Profile", "Your centered hero, engineering focus, core tools, and contact copy.");
       var P = state.PROFILE;
 
       mainEl.appendChild(panel("Identity", [
         field("Name", P.name, function(v){ P.name=v; save(); }),
-        field("Tagline", P.tagline, function(v){ P.tagline=v; save(); }, {placeholder:"Gameplay & Multiplayer Systems Engineer"}),
-        field("Hero tagline", P.heroTag, function(v){ P.heroTag=v; save(); }, {placeholder:"Open to new projects & collaborations", hint:"Shown below the availability dot in the hero."}),
-        field("Rotating words (comma separated)", (P.roleWords||[]).join(", "), function(v){ P.roleWords=csvToList(v); save(); }, {mono:true, hint:"Cycles after 'Multiplayer ·' in the hero."}),
-        field("Hero intro", P.intro, function(v){ P.intro=v; save(); }, {textarea:true, rows:4}),
-        field("About (contact section)", P.about, function(v){ P.about=v; save(); }, {textarea:true, rows:3})
+        field("Professional title", P.tagline, function(v){ P.tagline=v; save(); }, {placeholder:"Gameplay & Multiplayer Systems Engineer"}),
+        field("Hero statement", P.intro, function(v){ P.intro=v; save(); }, {textarea:true, rows:2, hint:"Keep this to one direct sentence."}),
+        field("Contact introduction", P.about, function(v){ P.about=v; save(); }, {textarea:true, rows:3})
       ]));
-
-      // stats
-      var stats = P.stats || (P.stats=[]);
-      var statBox = h("div");
-      stats.forEach(function(s,i){
-        statBox.appendChild(h("div",{class:"row"},[
-          field("Value", s.value, function(v){ s.value=v; save(); }),
-          field("Label", s.label, function(v){ s.label=v; save(); }),
-          rowTools(stats,i,reRender)
-        ]));
-      });
-      statBox.appendChild(addBtn("+ Add stat", function(){ stats.push({value:"",label:""}); reRender(); }));
-      mainEl.appendChild(panel("Stat strip", statBox));
 
       // pillars
       var pillars = P.pillars || (P.pillars=[]);
@@ -449,11 +514,11 @@
         ]));
       });
       pBox.appendChild(addBtn("+ Add pillar", function(){ pillars.push({title:"",body:""}); reRender(); }));
-      mainEl.appendChild(panel("What I Do (pillars)", pBox));
+      mainEl.appendChild(panel("Engineering focus", pBox));
 
       // stack
-      mainEl.appendChild(panel("Tech stack", [
-        field("One tag per line", listToText(P.stack), function(v){ P.stack=textToList(v); save(); }, {textarea:true, rows:8, mono:true})
+      mainEl.appendChild(panel("Core tools", [
+        field("One tool per line", listToText(P.stack), function(v){ P.stack=textToList(v); save(); }, {textarea:true, rows:7, mono:true, hint:"Shown as one compact row below Engineering focus."})
       ]));
 
       mainEl.appendChild(panel("Footer", [
@@ -476,24 +541,191 @@
 
     /* ---------- THEME ---------- */
     function renderTheme(){
-      head("Theme & Colors", "Re-skin the whole site. Changes appear in the preview after a moment.");
+      head("Visual System", "Control the site fonts and color system. Changes appear in the preview after a moment.");
       var T = state.THEME;
-      var swatches = [
+
+      function fontControl(label, key, options, sample){
+        var preview = h("div",{class:"font-preview"},[
+          h("span",{class:"font-preview__primary",text:sample}),
+          h("span",{class:"font-preview__glyphs",text:"Aa Bb Cc  /  0123456789"})
+        ]);
+        function applyFontPreview(stack){
+          preview.style.fontFamily = stack;
+          if (document.fonts && document.fonts.load) {
+            document.fonts.load("500 32px " + stack).catch(function(){});
+          }
+        }
+        applyFontPreview(T[key]);
+        var isPreset = options.some(function(o){ return o.value === T[key]; });
+        var presetOptions = options.map(function(o){
+          var option = h("option",{value:o.value, selected:o.value===T[key], text:o.label + "  ·  Aa"});
+          option.style.fontFamily = o.value;
+          return option;
+        });
+        presetOptions.push(h("option",{value:"__custom__", selected:!isPreset, text:"Custom font"}));
+        var preset;
+        var customWrap;
+        var custom = h("input",{
+          type:"text",
+          class:"in in--mono",
+          value:T[key] || "",
+          placeholder:"Example: Inter, Arial, sans-serif",
+          on:{ input:function(e){
+            T[key] = e.target.value;
+            preset.value = options.some(function(o){ return o.value === e.target.value; }) ? e.target.value : "__custom__";
+            preset.style.fontFamily = e.target.value;
+            applyFontPreview(e.target.value);
+            save();
+          }}
+        });
+        preset = h("select",{class:"in font-select", on:{ change:function(e){
+          if (e.target.value === "__custom__") {
+            customWrap.hidden = false;
+            custom.focus();
+            return;
+          }
+          customWrap.hidden = true;
+          T[key] = e.target.value;
+          custom.value = e.target.value;
+          preset.style.fontFamily = e.target.value;
+          applyFontPreview(e.target.value);
+          save();
+        }}}, presetOptions);
+        preset.style.fontFamily = T[key];
+        customWrap = h("label",{class:"f font-custom", hidden:isPreset},[
+          h("span",{class:"f__label",text:"Custom CSS font stack"}),
+          custom
+        ]);
+        return h("div",{class:"font-control"},[
+          h("div",{class:"font-control__head"},[
+            h("span",{text:label})
+          ]),
+          preview,
+          preset,
+          customWrap
+        ]);
+      }
+
+      var sansFonts = [
+        {value:"\"Manrope\", Arial, sans-serif",label:"Manrope"},
+        {value:"\"Inter\", Arial, sans-serif",label:"Inter"},
+        {value:"\"DM Sans\", Arial, sans-serif",label:"DM Sans"},
+        {value:"\"Space Grotesk\", Arial, sans-serif",label:"Space Grotesk"},
+        {value:"\"Plus Jakarta Sans\", Arial, sans-serif",label:"Plus Jakarta Sans"},
+        {value:"\"Sora\", Arial, sans-serif",label:"Sora"},
+        {value:"\"Outfit\", Arial, sans-serif",label:"Outfit"},
+        {value:"\"IBM Plex Sans\", Arial, sans-serif",label:"IBM Plex Sans"},
+        {value:"\"Work Sans\", Arial, sans-serif",label:"Work Sans"},
+        {value:"\"Source Sans 3\", Arial, sans-serif",label:"Source Sans 3"},
+        {value:"\"Lora\", Georgia, serif",label:"Lora (Serif)"},
+        {value:"\"Merriweather\", Georgia, serif",label:"Merriweather (Serif)"},
+        {value:"system-ui, sans-serif",label:"System UI"},
+        {value:"Arial, Helvetica, sans-serif",label:"Arial"},
+        {value:"\"Segoe UI\", Tahoma, sans-serif",label:"Segoe UI"},
+        {value:"\"Trebuchet MS\", Arial, sans-serif",label:"Trebuchet"}
+      ];
+      var headingFonts = sansFonts.concat([
+        {value:"\"Barlow Condensed\", Arial, sans-serif",label:"Barlow Condensed"},
+        {value:"\"Oswald\", Arial, sans-serif",label:"Oswald"},
+        {value:"\"Instrument Serif\", Georgia, serif",label:"Instrument Serif"},
+        {value:"\"DM Serif Display\", Georgia, serif",label:"DM Serif Display"},
+        {value:"\"Playfair Display\", Georgia, serif",label:"Playfair Display"},
+        {value:"Georgia, \"Times New Roman\", serif",label:"Georgia"}
+      ]);
+      var monoFonts = [
+        {value:"\"IBM Plex Mono\", Consolas, monospace",label:"IBM Plex Mono"},
+        {value:"\"JetBrains Mono\", Consolas, monospace",label:"JetBrains Mono"},
+        {value:"\"Fira Code\", Consolas, monospace",label:"Fira Code"},
+        {value:"\"Source Code Pro\", Consolas, monospace",label:"Source Code Pro"},
+        {value:"\"Roboto Mono\", Consolas, monospace",label:"Roboto Mono"},
+        {value:"\"Space Mono\", Consolas, monospace",label:"Space Mono"},
+        {value:"ui-monospace, SFMono-Regular, Consolas, monospace",label:"System Mono"},
+        {value:"Consolas, \"Courier New\", monospace",label:"Consolas"},
+        {value:"\"Courier New\", monospace",label:"Courier New"}
+      ];
+
+      mainEl.appendChild(panel("Typography", [
+        fontControl("Body font", "fontSans", sansFonts, "Clear, direct, and easy to read."),
+        fontControl("Heading font", "fontHeading", headingFonts, "Mark Zaki"),
+        fontControl("Mono and UI font", "fontMono", monoFonts, "UNITY / C# / SYSTEMS")
+      ]));
+
+      var colorChoices = [
+        {value:"#0d0f12",label:"Graphite black"},
+        {value:"#12151a",label:"Deep graphite"},
+        {value:"#171b21",label:"Graphite"},
+        {value:"#1d222a",label:"Raised graphite"},
+        {value:"#2c323b",label:"Border slate"},
+        {value:"#222831",label:"Soft border"},
+        {value:"#f1f3f5",label:"Cool white"},
+        {value:"#ffffff",label:"Pure white"},
+        {value:"#d7dbe0",label:"Soft white"},
+        {value:"#a6acb5",label:"Muted silver"},
+        {value:"#757d89",label:"Caption slate"},
+        {value:"#d3a465",label:"Copper"},
+        {value:"#e2bb82",label:"Soft copper"},
+        {value:"#80603a",label:"Deep copper"},
+        {value:"#000000",label:"Pure black"}
+      ];
+
+      function colorChoiceBox(swatches){
+        var box = h("div");
+        swatches.forEach(function(pair){
+          var key = pair[0];
+          var current = String(T[key] || "");
+          var isChoice = colorChoices.some(function(o){ return o.value.toLowerCase() === current.toLowerCase(); });
+          var dot = h("span",{class:"color-dot"});
+          dot.style.background = current || "#000000";
+          var picker;
+          var select = h("select",{class:"in color-select", on:{ change:function(e){
+            if (e.target.value === "__custom__") {
+              picker.click();
+              return;
+            }
+            T[key] = e.target.value;
+            picker.value = e.target.value;
+            dot.style.background = e.target.value;
+            save();
+          }}}, colorChoices.map(function(o){
+            return h("option",{value:o.value, selected:o.value.toLowerCase()===current.toLowerCase(), text:o.label});
+          }).concat([
+            h("option",{value:"__custom__", selected:!isChoice, text:"Custom color"})
+          ]));
+          picker = h("input",{type:"color", value:/^#[0-9a-fA-F]{6}$/.test(current)?current:"#000000", attrs:{"aria-label":"Choose custom color for " + pair[1]}, on:{ input:function(e){
+            T[key] = e.target.value;
+            select.value = colorChoices.some(function(o){ return o.value.toLowerCase() === e.target.value.toLowerCase(); }) ? e.target.value : "__custom__";
+            dot.style.background = e.target.value;
+            save();
+          }}});
+          box.appendChild(h("div",{class:"color-choice"},[
+            h("span",{class:"color-choice__label",text:pair[1]}),
+            dot,
+            select,
+            picker
+          ]));
+        });
+        return box;
+      }
+
+      var textSwatches = [
+        ["heroText","Hero name"],
+        ["headingText","Section and page headings"],
+        ["projectTitle","Project card titles"],
+        ["bodyText","Descriptions and body copy"]
+      ];
+      mainEl.appendChild(panel("Main text colors", [
+        h("div",{class:"note",text:"Choose a named color from the dropdown, or use the color picker for a custom color."}),
+        colorChoiceBox(textSwatches)
+      ]));
+
+      var paletteSwatches = [
         ["bg","Page background"],["bg2","Alt band"],["surface","Card surface"],["surface2","Hover surface"],
         ["line","Borders"],["lineSoft","Faint borders"],["text","Primary text"],["muted","Secondary text"],
         ["faint","Captions"],["accent","Accent"],["accentSoft","Accent (light)"],["accentDeep","Accent (deep)"]
       ];
-      var box = h("div");
-      swatches.forEach(function(pair){
-        var key = pair[0];
-        function setVal(v){ T[key]=v; save(); }
-        var color = h("input",{type:"color", value: /^#/.test(T[key]||"")?T[key]:"#000000", on:{ input:function(e){ setVal(e.target.value); txt.value=e.target.value; } }});
-        var txt = h("input",{type:"text", class:"in", value:T[key]||"", on:{ input:function(e){ setVal(e.target.value); if(/^#[0-9a-fA-F]{6}$/.test(e.target.value)) color.value=e.target.value; } }});
-        box.appendChild(h("div",{class:"swatch"},[ h("span",{text:pair[1]}), color, txt ]));
-      });
-      mainEl.appendChild(panel("Palette", box));
+      mainEl.appendChild(panel("Foundation palette", colorChoiceBox(paletteSwatches)));
       mainEl.appendChild(panel("Reset", [
-        h("button",{class:"add", text:"Reset colors to default", on:{ click:function(){ if(confirm("Reset all colors to the original palette?")){ state.THEME = clone(DEFAULTS.THEME); reRender(); } }}})
+        h("button",{class:"add", text:"Reset visual system to default", on:{ click:function(){ if(confirm("Reset all fonts and colors to their defaults?")){ state.THEME = clone(DEFAULTS.THEME); reRender(); } }}})
       ]));
     }
 
@@ -531,16 +763,16 @@
       mainEl.appendChild(panel("Basics", [
         field("Title", p.title, function(v){ p.title=v; save(); }),
         field("URL id (unique, url-safe)", p.id, function(v){ p.id=slug(v); save(); }, {mono:true, hint:"Used in project.html?id=…"}),
-        field("Eyebrow / subtitle", p.subtitle, function(v){ p.subtitle=v; save(); }, {placeholder:"Action RPG · Combat · AI"}),
-        field("Tagline (one line on the card)", p.tagline, function(v){ p.tagline=v; save(); }, {textarea:true, rows:2}),
+        field("Project type / subtitle", p.subtitle, function(v){ p.subtitle=v; save(); }, {placeholder:"Action RPG · Combat · AI"}),
+        field("Short summary", p.tagline, function(v){ p.tagline=v; save(); }, {textarea:true, rows:2, hint:"Used on the project card and below the project title."}),
         field("Tags (comma separated)", (p.tags||[]).join(", "), function(v){ p.tags=csvToList(v); save(); }, {mono:true}),
         checkField("Featured (show on home page)", p.featured, function(c){ p.featured=c; save(); })
       ]));
 
-      mainEl.appendChild(panel("Info sidebar", [
+      mainEl.appendChild(panel("Project summary", [
         field("Role", p.role, function(v){ p.role=v; save(); }),
         field("Timeline", p.timeline, function(v){ p.timeline=v; save(); }),
-        field("Tech stack", p.techStack, function(v){ p.techStack=v; save(); })
+        field("Built with", p.techStack, function(v){ p.techStack=v; save(); })
       ]));
 
       // cover
@@ -550,13 +782,9 @@
       // media gallery
       var media = p.media || (p.media=[]);
       var gbox = h("div");
-      if (!media.length) gbox.appendChild(h("div",{class:"note", html:"No gallery media yet. Add a featured video plus images/clips. They appear as a main viewer with a thumbnail strip on the project page (Unity Asset Store style)."}));
+      if (!media.length) gbox.appendChild(h("div",{class:"note", html:"No gallery media yet. Add a featured video plus images or clips. They appear in a main viewer with a compact thumbnail strip."}));
       media.forEach(function(m,j){
-        var item = h("div",{class:"sub"},[
-          h("div",{class:"row"},[ h("div",{class:"f",style:"flex:1"},[ h("span",{class:"f__label",text:"Item "+(j+1)+(m.featured?" · featured":"")}) ]), rowTools(media,j,reRender) ]),
-          mediaEditor(m, reRender, {gallery:true, list:media})
-        ]);
-        gbox.appendChild(item);
+        gbox.appendChild(compactMediaItem(m,j,media));
       });
       gbox.appendChild(h("div",{class:"typebtns"}, [
         ["youtube","+ YouTube"],["video","+ Video"],["image","+ Image"],["embed","+ Embed"],["text","+ Placeholder"]
@@ -566,6 +794,7 @@
       // sections
       var secs = p.sections || (p.sections=[]);
       var sbox = h("div");
+      sbox.appendChild(h("div",{class:"note",text:"Recommended order: Problem, My role, Constraints, Technical approach, Key decisions, Result, and What I learned."}));
       secs.forEach(function(s,j){
         sbox.appendChild(h("div",{class:"sub"},[
           h("div",{class:"row"},[ field("Heading", s.heading, function(v){ s.heading=v; save(); }), rowTools(secs,j,reRender) ]),
@@ -574,7 +803,7 @@
         ]));
       });
       sbox.appendChild(addBtn("+ Add section", function(){ secs.push({heading:"",body:""}); reRender(); }));
-      mainEl.appendChild(panel("Write-up sections", sbox));
+      mainEl.appendChild(panel("Case study sections", sbox));
 
       // links
       var links = p.links || (p.links=[]);

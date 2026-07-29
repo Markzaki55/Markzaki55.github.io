@@ -15,6 +15,17 @@ function esc(s) {
 }
 function isExternal(url) { return /^https?:/i.test(url); }
 
+/* Keep unfinished CMS entries private without deleting them from the editor. */
+function isPublishableProject(p) {
+  if (!p || !p.title || /^new project(?:\s+\d+)?$/i.test(p.title.trim())) return false;
+  return Boolean(
+    p.tagline ||
+    (p.tags && p.tags.length) ||
+    (p.media && p.media.length) ||
+    (p.sections && p.sections.length)
+  );
+}
+
 /* ----------------------------------------------------------------------
    DRAFT + THEME
    The admin dashboard (admin.html) saves a working copy of the site data to
@@ -31,9 +42,52 @@ function loadDraft() {
 function hydrateFromDraft() {
   const d = loadDraft();
   if (!d) return;
-  if (d.PROFILE && typeof PROFILE !== "undefined") Object.assign(PROFILE, d.PROFILE);
-  if (d.THEME && typeof THEME !== "undefined") Object.assign(THEME, d.THEME);
-  if (Array.isArray(d.PROJECTS) && typeof PROJECTS !== "undefined") {
+  const themeDefaults = typeof THEME !== "undefined"
+    ? JSON.parse(JSON.stringify(THEME))
+    : null;
+  let useDraftProjects = true;
+  if (d.PROFILE && typeof PROFILE !== "undefined") {
+    const profileDefaults = JSON.parse(JSON.stringify(PROFILE));
+    Object.assign(PROFILE, d.PROFILE);
+    if ((d.PROFILE.layoutVersion || 0) < profileDefaults.layoutVersion) {
+      ["tagline", "intro", "about", "pillars", "stack", "footerTagline"].forEach((key) => {
+        PROFILE[key] = JSON.parse(JSON.stringify(profileDefaults[key]));
+      });
+      PROFILE.layoutVersion = profileDefaults.layoutVersion;
+    }
+    if ((d.PROFILE.expertiseVersion || 0) < (profileDefaults.expertiseVersion || 0)) {
+      const expertiseReplacements = {
+        "Combat, AI & Character Systems": profileDefaults.pillars[1],
+        "Technical Leadership & Developer Tools": profileDefaults.pillars[3],
+      };
+      PROFILE.pillars = (PROFILE.pillars || []).map((pillar) =>
+        expertiseReplacements[pillar.title]
+          ? JSON.parse(JSON.stringify(expertiseReplacements[pillar.title]))
+          : pillar
+      );
+      PROFILE.expertiseVersion = profileDefaults.expertiseVersion;
+    }
+    if ((d.PROFILE.projectDataVersion || 0) < profileDefaults.projectDataVersion) {
+      useDraftProjects = false;
+      PROFILE.projectDataVersion = profileDefaults.projectDataVersion;
+    }
+  }
+  const hasLegacyDefaultPalette =
+    d.THEME && (
+      (d.THEME.bg === "#0b0c0d" && d.THEME.accent === "#E8A33D") ||
+      (d.THEME.bg === "#0f100e" && d.THEME.accent === "#ff643f")
+    );
+  if (d.THEME && typeof THEME !== "undefined") {
+    Object.assign(THEME, d.THEME);
+    if (hasLegacyDefaultPalette && themeDefaults) {
+      [
+        "bg", "bg2", "surface", "surface2", "line", "lineSoft",
+        "text", "muted", "faint", "accent", "accentSoft", "accentDeep",
+        "heroText", "headingText", "projectTitle", "bodyText"
+      ].forEach((key) => { THEME[key] = themeDefaults[key]; });
+    }
+  }
+  if (useDraftProjects && Array.isArray(d.PROJECTS) && typeof PROJECTS !== "undefined") {
     PROJECTS.length = 0;
     d.PROJECTS.forEach((p) => PROJECTS.push(p));
   }
@@ -44,13 +98,16 @@ const THEME_VARS = {
   bg: "--bg", bg2: "--bg-2", surface: "--surface", surface2: "--surface-2",
   line: "--line", lineSoft: "--line-soft", text: "--text", muted: "--muted",
   faint: "--faint", accent: "--accent", accentSoft: "--accent-soft", accentDeep: "--accent-deep",
+  fontSans: "--font-sans", fontHeading: "--font-heading", fontMono: "--font-mono",
+  heroText: "--hero-text", headingText: "--heading-text",
+  projectTitle: "--project-title", bodyText: "--body-text",
 };
 
 function hexToRgba(hex, a) {
   const h = String(hex).replace("#", "");
   const f = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
   const n = parseInt(f, 16);
-  if (isNaN(n) || f.length !== 6) return `rgba(232,163,61,${a})`;
+  if (isNaN(n) || f.length !== 6) return `rgba(211,164,101,${a})`;
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
 }
 
@@ -61,6 +118,15 @@ function applyTheme() {
     if (THEME[k]) root.setProperty(varName, THEME[k]);
   });
   if (THEME.accent) root.setProperty("--glow", hexToRgba(THEME.accent, 0.1));
+  if (THEME.bg) {
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "theme-color";
+      document.head.appendChild(meta);
+    }
+    meta.content = THEME.bg;
+  }
 }
 
 /* ----------------------------------------------------------------------
@@ -134,9 +200,9 @@ function createYouTubePlayer(container, videoId, label) {
   const fallback = { fallback: false };
   const start = (opts) => {
     if (opts && opts.fallback) {
-      // API didn't load in time — use static iframe fallback
+      // API did not load in time. Use the static iframe fallback.
       const iframe = makeYouTubeIframe(videoId, label);
-      container.parentNode.replaceWith(iframe);
+      container.replaceWith(iframe);
       return;
     }
     new YT.Player(container, {
@@ -146,10 +212,10 @@ function createYouTubePlayer(container, videoId, label) {
       playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
       events: {
         onError: (event) => {
-          // Error 153 — fall back to static iframe
+          // Error 153. Use the static iframe fallback.
           if (event.data === 153 || event.data === 150) {
             const iframe = makeYouTubeIframe(videoId, label);
-            container.parentNode.replaceWith(iframe);
+            container.replaceWith(iframe);
           } else {
             console.error("YouTube player error:", event.data);
           }
@@ -260,10 +326,12 @@ function mediaGallery(items) {
 
   const stage = el("div", "mediabox__stage");
   const frame = el("div", "mediabox__frame");
+  const count = el("span", "mediabox__count");
   const expand = el("button", "mediabox__expand", EXPAND_ICON);
   expand.type = "button";
   expand.setAttribute("aria-label", "Open fullscreen");
   stage.appendChild(frame);
+  stage.appendChild(count);
   stage.appendChild(expand);
 
   const cap = el("p", "mediabox__cap");
@@ -277,6 +345,7 @@ function mediaGallery(items) {
     const label = mediaLabel(m);
     cap.textContent = label;
     cap.style.display = label ? "" : "none";
+    count.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(ordered.length).padStart(2, "0")}`;
     thumbs.querySelectorAll(".thumb").forEach((x, i) => x.classList.toggle("is-active", i === idx));
   };
 
@@ -284,11 +353,16 @@ function mediaGallery(items) {
   box.appendChild(cap);
 
   if (ordered.length > 1) {
+    if (ordered.length <= 5) {
+      thumbs.classList.add("mediabox__thumbs--grid");
+      thumbs.style.setProperty("--media-count", ordered.length);
+    }
     ordered.forEach((m, i) => {
       const t = el("button", "thumb");
       t.type = "button";
       t.setAttribute("aria-label", mediaLabel(m, i));
       t.appendChild(mediaThumb(m));
+      t.appendChild(el("span", "thumb__index", String(i + 1).padStart(2, "0")));
       if (isPlayable(m)) t.appendChild(el("span", "thumb__play", PLAY_ICON));
       t.addEventListener("click", () => goto(i));
       thumbs.appendChild(t);
@@ -307,12 +381,16 @@ function mediaGallery(items) {
 }
 
 /* ----------------------------------------------------------------------
-   LIGHTBOX — fullscreen viewer with prev/next + keyboard control
+   LIGHTBOX: fullscreen viewer with previous, next, and keyboard control
    ---------------------------------------------------------------------- */
 function openLightbox(items, startIndex) {
   let i = startIndex || 0;
+  const previousOverflow = document.body.style.overflow;
 
   const ov = el("div", "lb");
+  ov.setAttribute("role", "dialog");
+  ov.setAttribute("aria-modal", "true");
+  ov.setAttribute("aria-label", "Project media viewer");
   const frame = el("div", "lb__frame");
   const cap = el("p", "lb__cap");
   const prev = el("button", "lb__nav lb__nav--prev", "‹");
@@ -333,7 +411,11 @@ function openLightbox(items, startIndex) {
     const label = mediaLabel(items[i], i);
     cap.textContent = single ? label : `${label}  ·  ${i + 1} / ${items.length}`;
   };
-  const done = () => { document.removeEventListener("keydown", onKey); ov.remove(); };
+  const done = () => {
+    document.removeEventListener("keydown", onKey);
+    document.body.style.overflow = previousOverflow;
+    ov.remove();
+  };
   const onKey = (e) => {
     if (e.key === "Escape") done();
     else if (e.key === "ArrowRight" && !single) { i++; show(); }
@@ -347,8 +429,10 @@ function openLightbox(items, startIndex) {
 
   ov.append(close, prev, frame, next, cap);
   document.body.appendChild(ov);
+  document.body.style.overflow = "hidden";
   document.addEventListener("keydown", onKey);
   requestAnimationFrame(() => ov.classList.add("in"));
+  close.focus();
   show();
 }
 
@@ -359,85 +443,27 @@ function makeLink(text, url, cls) {
   return a;
 }
 
-/* Brand lives in the shared header; only fill the name span if empty. */
-function setBrand() {
-  const name = document.querySelector(".brand__name");
-  if (name && !name.innerHTML.trim()) name.innerHTML = `Mark <b>Zaki</b>`;
-}
-
-/* mobile nav toggle (shared) */
-function initMobileNav() {
-  const head = document.getElementById("site-head");
-  const toggle = document.getElementById("nav-toggle");
-  if (!head || !toggle) return;
-  const setOpen = (open) => {
-    head.classList.toggle("is-open", open);
-    toggle.setAttribute("aria-expanded", open ? "true" : "false");
-  };
-  toggle.addEventListener("click", () => setOpen(!head.classList.contains("is-open")));
-  // close after choosing a destination
-  head.querySelectorAll(".nav a").forEach((a) =>
-    a.addEventListener("click", () => setOpen(false)));
-  // close when resizing back to desktop
-  window.addEventListener("resize", () => {
-    if (window.innerWidth > 860) setOpen(false);
-  });
-}
-
-/* scroll reveal */
-function observeReveals() {
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } });
-  }, { threshold: 0.12 });
-  document.querySelectorAll(".reveal").forEach((n) => io.observe(n));
-}
-
 /* ======================================================================
    HOME
    ====================================================================== */
 function renderHome() {
-  document.title = `${PROFILE.name} · ${PROFILE.tagline}`;
-  setBrand();
+  document.title = `${PROFILE.name} | ${PROFILE.tagline}`;
   document.getElementById("name").textContent = PROFILE.name;
+  document.getElementById("tagline").textContent = PROFILE.tagline;
   document.getElementById("intro").textContent = PROFILE.intro;
 
-  // hero tagline
-  const heroTag = document.querySelector(".hero__tag");
-  if (heroTag && PROFILE.heroTag) heroTag.textContent = PROFILE.heroTag;
-
-  // rotating role
-  const rot = document.getElementById("rotator");
-  let i = 0;
-  rot.textContent = PROFILE.roleWords[0];
-  if (PROFILE.roleWords.length > 1) {
-    setInterval(() => {
-      i = (i + 1) % PROFILE.roleWords.length;
-      rot.textContent = PROFILE.roleWords[i];
-    }, 2200);
-  }
-
-  // stats
-  const stats = document.getElementById("stats");
-  (PROFILE.stats || []).forEach((s) => {
-    const st = el("div", "stat");
-    st.appendChild(el("div", "stat__value", esc(s.value)));
-    st.appendChild(el("div", "stat__label", esc(s.label)));
-    stats.appendChild(st);
-  });
-  if (!(PROFILE.stats || []).length) stats.style.display = "none";
-
-  // buttons
+  // Keep the hero actions focused on the work and direct contact.
   const actions = document.getElementById("actions");
   const L = PROFILE.links;
-  if (L.github)   actions.appendChild(makeLink("GitHub ↗", L.github, "btn"));
-  if (L.resume)   actions.appendChild(makeLink("Resume / CV", L.resume, "btn btn--accent"));
-  if (L.linkedin) actions.appendChild(makeLink("LinkedIn ↗", L.linkedin, "btn"));
-  if (L.email)    actions.appendChild(makeLink("Email", L.email, "btn"));
+  actions.appendChild(makeLink("View work", "#work", "btn btn--accent"));
+  if (L.resume) actions.appendChild(makeLink("Résumé", L.resume, "btn"));
+  else if (L.email) actions.appendChild(makeLink("Email me", L.email.trim(), "btn"));
 
   // pillars
   const pillars = document.getElementById("pillars");
   PROFILE.pillars.forEach((p, idx) => {
     const card = el("div", "pillar");
+    card.appendChild(el("div", "pillar__num", String(idx + 1).padStart(2, "0")));
     card.appendChild(el("div", "pillar__title", esc(p.title)));
     card.appendChild(el("div", "pillar__body", esc(p.body)));
     pillars.appendChild(card);
@@ -453,35 +479,77 @@ function renderHome() {
 
   // projects - only featured ones on the home page
   const grid = document.getElementById("projects");
-  const featured = PROJECTS.filter((p) => p.featured);
+  const publicProjects = PROJECTS.filter(isPublishableProject);
+  const featured = publicProjects.filter((p) => p.featured);
   featured.forEach((p) => grid.appendChild(projectCard(p)));
 
-  // "All projects" link if there are more beyond the featured set
+  // Keep a clear route to the complete project list.
   const more = document.getElementById("all-projects");
-  if (more && PROJECTS.length > featured.length) {
+  if (more && publicProjects.length) {
     more.style.display = "";
   }
 
-  observeReveals();
+}
+
+function projectSource() {
+  const currentPage = document.body.dataset.page;
+  if (currentPage === "home") return "home";
+  if (currentPage === "projects") return "projects";
+
+  const explicitSource = new URLSearchParams(location.search).get("from");
+  if (explicitSource === "home" || explicitSource === "projects") return explicitSource;
+
+  try {
+    const referrer = new URL(document.referrer);
+    if (referrer.origin === location.origin) {
+      const page = referrer.pathname.split("/").pop();
+      if (!page || page === "index.html") return "home";
+      if (page === "projects.html") return "projects";
+    }
+  } catch (_) {
+    // Direct visits do not always include a usable referrer.
+  }
+
+  return "projects";
+}
+
+function projectHref(id, source = projectSource()) {
+  return `project.html?id=${encodeURIComponent(id)}&from=${encodeURIComponent(source)}`;
 }
 
 function projectCard(p) {
-  const card = el("a", "pcard reveal" + (p.featured ? " pcard--featured" : ""));
-  card.href = `project.html?id=${encodeURIComponent(p.id)}`;
+  const card = el("a", "pcard");
+  card.href = projectHref(p.id);
   card.setAttribute("aria-label", p.title);
   card.dataset.tags = (p.tags || []).map((t) => t.toLowerCase()).join("|");
 
   const m = el("div", "pcard__media");
-  m.appendChild(media(p.cover));
-  if (p.featured) m.appendChild(el("span", "pcard__badge", "Featured"));
+  const cover = media(p.cover);
+  if (cover.tagName === "VIDEO") {
+    cover.controls = false;
+    cover.autoplay = true;
+    cover.muted = true;
+    cover.loop = true;
+    cover.playsInline = true;
+    cover.setAttribute("aria-hidden", "true");
+  }
+  m.appendChild(cover);
   card.appendChild(m);
 
   const body = el("div", "pcard__body");
-  if (p.tags && p.tags.length)
-    body.appendChild(el("div", "pcard__tags", p.tags.map((t) => `<span>${esc(t)}</span>`).join("")));
-  body.appendChild(el("div", "pcard__title", esc(p.title)));
-  if (p.tagline) body.appendChild(el("div", "pcard__tagline", esc(p.tagline)));
-  body.appendChild(el("div", "pcard__cta", `View project <span class="arrow">→</span>`));
+  const cardMeta = [p.role, p.timeline].filter(Boolean);
+  if (cardMeta.length) {
+    body.appendChild(el(
+      "div",
+      "pcard__meta",
+      cardMeta.slice(0, 2).map((item) => `<span>${esc(item)}</span>`).join("")
+    ));
+  }
+  const heading = el("div", "pcard__heading");
+  heading.appendChild(el("h3", "pcard__title", esc(p.title)));
+  heading.appendChild(el("span", "pcard__arrow", "View ↗"));
+  body.appendChild(heading);
+  if (p.tagline) body.appendChild(el("p", "pcard__tagline", esc(p.tagline)));
   card.appendChild(body);
   return card;
 }
@@ -490,125 +558,123 @@ function projectCard(p) {
    ALL PROJECTS PAGE
    ====================================================================== */
 function renderProjects() {
-  setBrand();
-  document.title = `All Projects · ${PROFILE.name}`;
+  document.title = `All Projects | ${PROFILE.name}`;
 
-  const featured = PROJECTS.filter((p) => p.featured);
-  const other = PROJECTS.filter((p) => !p.featured);
+  const publicProjects = PROJECTS.filter(isPublishableProject);
 
   const count = document.getElementById("proj-count");
   if (count) {
-    const total = PROJECTS.length;
-    count.textContent =
-      `${total} project${total === 1 ? "" : "s"} · ${featured.length} featured, ${other.length} archived`;
+    const total = publicProjects.length;
+    count.textContent = `${total} project${total === 1 ? "" : "s"}`;
   }
 
-  const fg = document.getElementById("featured-group");
-  if (fg) {
-    fg.appendChild(groupHead("Featured", featured.length));
-    const grid = el("div", "projgrid");
-    featured.forEach((p) => grid.appendChild(projectCard(p)));
-    fg.appendChild(grid);
-  }
-
-  const og = document.getElementById("other-group");
-  if (og && other.length) {
-    og.appendChild(groupHead("More Work", other.length));
-    const grid = el("div", "projgrid");
-    other.forEach((p) => grid.appendChild(projectCard(p)));
-    og.appendChild(grid);
-  }
-
-  buildProjectFilter();
-  observeReveals();
-}
-
-/* Tag filter chips on the All Projects page. */
-function buildProjectFilter() {
-  const bar = document.getElementById("proj-filter");
-  if (!bar) return;
-
-  const seen = new Set();
-  const tags = [];
-  PROJECTS.forEach((p) => (p.tags || []).forEach((t) => {
-    const key = t.toLowerCase();
-    if (!seen.has(key)) { seen.add(key); tags.push(t); }
-  }));
-
-  const apply = (tag) => {
-    const norm = tag.toLowerCase();
-    bar.querySelectorAll(".chip").forEach((c) => c.classList.toggle("is-active", c.dataset.tag === tag));
-    document.querySelectorAll(".projgroup").forEach((group) => {
-      let shown = 0;
-      group.querySelectorAll(".pcard").forEach((card) => {
-        const match = tag === "All" || (card.dataset.tags || "").split("|").includes(norm);
-        card.style.display = match ? "" : "none";
-        if (match) shown++;
-      });
-      // hide a whole group (and its heading) when nothing in it matches
-      group.style.display = shown ? "" : "none";
-    });
-  };
-
-  ["All", ...tags].forEach((t, i) => {
-    const chip = el("button", "chip" + (i === 0 ? " is-active" : ""), esc(t));
-    chip.type = "button";
-    chip.dataset.tag = t;
-    chip.addEventListener("click", () => apply(t));
-    bar.appendChild(chip);
-  });
-}
-
-function groupHead(label, count) {
-  const wrap = el("div", "projgroup__head reveal");
-  wrap.appendChild(el("span", "mono", `${label}`));
-  wrap.appendChild(el("span", "projgroup__count", String(count).padStart(2, "0")));
-  return wrap;
+  const grid = document.getElementById("all-projects-grid");
+  if (grid) publicProjects.forEach((p) => grid.appendChild(projectCard(p)));
 }
 
 /* ======================================================================
    PROJECT DETAIL
    ====================================================================== */
 function renderProject() {
-  const id = new URLSearchParams(location.search).get("id");
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id");
   const p = PROJECTS.find((x) => x.id === id);
   const root = document.getElementById("detail");
-
-  setBrand();
+  const source = projectSource();
+  const returnLink = source === "home"
+    ? { label: "← Back to home", href: "index.html#work" }
+    : { label: "← All projects", href: "projects.html" };
 
   if (!p) {
-    root.appendChild(makeLink("← Back to projects", "index.html", "back"));
-    root.appendChild(el("h1", "detail__title", "Project not found"));
+    const topbar = el("div", "detail__topbar");
+    topbar.appendChild(makeLink(returnLink.label, returnLink.href, "back"));
+    root.appendChild(topbar);
+    const header = el("header", "detail__header");
+    header.appendChild(el("p", "detail__eyebrow", "Project"));
+    header.appendChild(el("h1", "detail__title", "Project not found"));
+    header.appendChild(el("p", "detail__lead", "This project may have moved or is not published yet."));
+    root.appendChild(header);
     return;
   }
-  document.title = `${p.title} · ${PROFILE.name}`;
+  document.title = `${p.title} | ${PROFILE.name}`;
+  const description = p.tagline || p.subtitle || `A project by ${PROFILE.name}.`;
+  let descMeta = document.querySelector('meta[name="description"]');
+  if (!descMeta) {
+    descMeta = document.createElement("meta");
+    descMeta.name = "description";
+    document.head.appendChild(descMeta);
+  }
+  descMeta.content = description;
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  const ogDescription = document.querySelector('meta[property="og:description"]');
+  if (ogTitle) ogTitle.content = `${p.title} | ${PROFILE.name}`;
+  if (ogDescription) ogDescription.content = description;
 
-  root.appendChild(makeLink("← Back to projects", "index.html", "back"));
+  const publicProjects = PROJECTS.filter(isPublishableProject);
+  const projectIndex = publicProjects.findIndex((item) => item.id === p.id);
 
-  if (p.subtitle) root.appendChild(el("p", "detail__eyebrow", esc(p.subtitle)));
-  root.appendChild(el("h1", "detail__title", esc(p.title)));
-  if (p.tags && p.tags.length)
-    root.appendChild(el("div", "detail__tags", p.tags.map((t) => `<span>${esc(t)}</span>`).join("")));
+  const topbar = el("div", "detail__topbar");
+  topbar.appendChild(makeLink(returnLink.label, returnLink.href, "back"));
+  if (projectIndex > -1) {
+    topbar.appendChild(el(
+      "span",
+      "detail__position",
+      `Project ${String(projectIndex + 1).padStart(2, "0")} / ${String(publicProjects.length).padStart(2, "0")}`
+    ));
+  }
+  root.appendChild(topbar);
 
-  const body = el("div", "detail__body");
-  const main = el("div", "detail__main");
+  const intro = el("section", "detail__intro");
+  const summary = el("header", "detail__summary");
+  if (p.subtitle) summary.appendChild(el("p", "detail__eyebrow", esc(p.subtitle)));
+  summary.appendChild(el("h1", "detail__title", esc(p.title)));
+  if (p.tagline) summary.appendChild(el("p", "detail__lead", esc(p.tagline)));
+  if (p.tags && p.tags.length) {
+    summary.appendChild(el(
+      "div",
+      "detail__tags",
+      p.tags.slice(0, 4).map((t) => `<span>${esc(t)}</span>`).join("")
+    ));
+  }
 
-  // Asset-store style gallery when a media[] array is present, otherwise a
-  // single hero frame from `hero` (falling back to the card cover).
+  // Keep project facts beside the title so the introduction stays compact.
+  const info = el("aside", "info");
+  [["Role", p.role], ["Timeline", p.timeline], ["Built with", p.techStack]]
+    .filter(([, v]) => v)
+    .forEach(([label, val]) => {
+      const row = el("div", "info__row");
+      row.appendChild(el("div", "info__label", esc(label)));
+      row.appendChild(el("div", "info__value", esc(val)));
+      info.appendChild(row);
+    });
+
+  if (p.links && p.links.length) {
+    const row = el("div", "info__row info__row--links");
+    p.links.forEach((l) =>
+      row.appendChild(makeLink(l.text, l.url, "btn btn--block" + (l.accent ? " btn--accent" : ""))));
+    info.appendChild(row);
+  }
+  summary.appendChild(info);
+
+  const visual = el("div", "detail__visual");
   if (p.media && p.media.length) {
     const hero = el("div", "detail__hero detail__hero--gallery");
     hero.appendChild(mediaGallery(p.media));
-    main.appendChild(hero);
+    visual.appendChild(hero);
   } else {
     const hero = el("div", "detail__hero");
     hero.appendChild(media(p.hero || p.cover));
-    main.appendChild(hero);
+    visual.appendChild(hero);
   }
 
-  (p.sections || []).forEach((sec) => {
+  intro.append(summary, visual);
+  root.appendChild(intro);
+
+  const main = el("div", "detail__main");
+  (p.sections || []).forEach((sec, sectionIndex) => {
     const s = el("div", "dsection");
     const head = el("div", "dsection__head");
-    head.appendChild(el("span", "dsection__bar"));
+    head.appendChild(el("span", "dsection__num", String(sectionIndex + 1).padStart(2, "0")));
     head.appendChild(el("h2", null, esc(sec.heading)));
     s.appendChild(head);
 
@@ -635,35 +701,38 @@ function renderProject() {
     });
     main.appendChild(g);
   }
+  root.appendChild(main);
 
-  body.appendChild(main);
-
-  // info sidebar
-  const info = el("aside", "info");
-  info.appendChild(el("div", "info__head", "Project Info"));
-  [["Role", p.role], ["Timeline", p.timeline], ["Tech Stack", p.techStack]]
-    .filter(([, v]) => v)
-    .forEach(([label, val]) => {
-      const row = el("div", "info__row");
-      row.appendChild(el("div", "info__label", esc(label)));
-      row.appendChild(el("div", "info__value", esc(val)));
-      info.appendChild(row);
-    });
-
-  // pull project action links into the sidebar too, so they're always visible
-  if (p.links && p.links.length) {
-    const row = el("div", "info__row info__row--links");
-    p.links.forEach((l) =>
-      row.appendChild(makeLink(l.text, l.url, "btn btn--block" + (l.accent ? " btn--accent" : ""))));
-    info.appendChild(row);
+  const projectNav = el("nav", "projectnav");
+  projectNav.setAttribute("aria-label", "Project navigation");
+  projectNav.appendChild(makeLink("All projects", "projects.html", "projectnav__all"));
+  const projectNavLinks = el("div", "projectnav__links");
+  const previous = projectIndex > 0 ? publicProjects[projectIndex - 1] : null;
+  const next = projectIndex > -1 && projectIndex < publicProjects.length - 1
+    ? publicProjects[projectIndex + 1]
+    : null;
+  if (previous) {
+    const previousLink = makeLink("", projectHref(previous.id, source), "projectnav__project projectnav__project--prev");
+    previousLink.append(
+      el("span", "projectnav__label", "Previous"),
+      el("strong", "projectnav__title", `← ${esc(previous.title)}`)
+    );
+    projectNavLinks.appendChild(previousLink);
   }
-  body.appendChild(info);
-
-  root.appendChild(body);
+  if (next) {
+    const nextLink = makeLink("", projectHref(next.id, source), "projectnav__project projectnav__project--next");
+    nextLink.append(
+      el("span", "projectnav__label", "Next"),
+      el("strong", "projectnav__title", `${esc(next.title)} →`)
+    );
+    projectNavLinks.appendChild(nextLink);
+  }
+  projectNav.appendChild(projectNavLinks);
+  root.appendChild(projectNav);
 }
 
 /* ======================================================================
-   CONTACT SECTION (home) - socials + message form
+   CONTACT SECTION (home)
    ====================================================================== */
 const SOCIAL_ICONS = {
   github:
@@ -680,13 +749,18 @@ function renderContact() {
   const about = document.getElementById("about-text");
   if (about && PROFILE.about) about.textContent = PROFILE.about;
 
+  const email = document.getElementById("contact-email");
+  if (email) {
+    if (PROFILE.links.email) email.href = PROFILE.links.email.trim();
+    else email.style.display = "none";
+  }
+
   const socials = document.getElementById("socials");
   if (socials) {
     const L = PROFILE.links;
     const items = [
       L.github   && { label: "GitHub",   url: L.github,   icon: SOCIAL_ICONS.github },
       L.linkedin && { label: "LinkedIn", url: L.linkedin, icon: SOCIAL_ICONS.linkedin },
-      L.email    && { label: "Email",    url: L.email,    icon: SOCIAL_ICONS.email },
       L.resume   && { label: "Resume",   url: L.resume,   icon: SOCIAL_ICONS.doc },
     ].filter(Boolean);
     items.forEach((it) => {
@@ -697,40 +771,6 @@ function renderContact() {
       socials.appendChild(a);
     });
   }
-
-  const form = document.getElementById("contact-form");
-  if (!form) return;
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const note = document.getElementById("cf-note");
-    const setNote = (msg, ok) => {
-      if (!note) return;
-      note.textContent = msg;
-      note.dataset.ok = ok ? "true" : "false";
-    };
-
-    const to = (PROFILE.links.email || "").replace(/^mailto:/i, "").trim();
-    if (!to) {
-      setNote("No contact email is configured yet.", false);
-      return;
-    }
-
-    const name = document.getElementById("cf-name").value.trim();
-    const from = document.getElementById("cf-email").value.trim();
-    const msg = document.getElementById("cf-message").value.trim();
-    if (!name || !from || !msg) {
-      setNote("Please fill in your name, email, and message.", false);
-      return;
-    }
-
-    const subject = `Portfolio message from ${name}`;
-    const body = `${msg}\n\n- ${name}\n${from}`;
-    const href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = href;
-    setNote("Opening your email app… if nothing happens, email me directly at " + to, true);
-    form.reset();
-  });
 }
 
 /* ======================================================================
@@ -739,13 +779,21 @@ function renderContact() {
 function renderFooter() {
   const f = document.getElementById("footer-links");
   if (!f) return;
+  const brand = document.querySelector(".footer__brand");
+  if (brand && !brand.querySelector(".footer__mark")) {
+    const mark = document.createElement("img");
+    mark.className = "footer__mark";
+    mark.src = "assets/mz-mark.svg";
+    mark.alt = "";
+    mark.setAttribute("aria-hidden", "true");
+    brand.prepend(mark);
+  }
   const L = PROFILE.links;
   const add = (t, u) => { if (u) f.appendChild(makeLink(t, u, "")); };
   add("GitHub", L.github);
   add("LinkedIn", L.linkedin);
   add("Email", L.email);
   add("Resume", L.resume);
-  f.appendChild(makeLink("Privacy Policy", "privacy-policy.html", ""));
 
   // footer tagline
   const ft = document.querySelector(".footer__tagline");
@@ -760,30 +808,6 @@ function renderFooter() {
 }
 
 /* ======================================================================
-   SCROLLSPY — highlight the in-view section in the header nav
-   ====================================================================== */
-function initScrollSpy() {
-  const links = [...document.querySelectorAll('.nav a[href*="#"]')];
-  const map = new Map();
-  links.forEach((a) => {
-    const id = (a.getAttribute("href") || "").split("#")[1];
-    const sec = id && document.getElementById(id);
-    if (sec) map.set(sec, a);
-  });
-  if (!map.size) return; // no on-page anchors (e.g. project pages)
-
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => {
-      if (!en.isIntersecting) return;
-      links.forEach((a) => a.removeAttribute("aria-current"));
-      const a = map.get(en.target);
-      if (a) a.setAttribute("aria-current", "page");
-    });
-  }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
-  map.forEach((_, sec) => io.observe(sec));
-}
-
-/* ======================================================================
    BOOT
    ====================================================================== */
 document.addEventListener("DOMContentLoaded", () => {
@@ -794,6 +818,4 @@ document.addEventListener("DOMContentLoaded", () => {
   if (document.body.dataset.page === "projects") renderProjects();
   renderContact();
   renderFooter();
-  initMobileNav();
-  initScrollSpy();
 });

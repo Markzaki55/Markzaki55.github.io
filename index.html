@@ -5,70 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Mark Zaki</title>
-  <meta name="description" content="Mark Zaki, a Gameplay & Multiplayer Systems Engineer. Unity, C#, server-authoritative netcode, Souls-like combat, and modular architecture.">
+  <meta name="description" content="Mark Zaki, a Gameplay & Multiplayer Systems Engineer working across shipped mobile games, multiplayer systems, VR, combat, AI, and developer tools.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Fira+Code:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&family=Sora:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&family=Source+Sans+3:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 
-  <!-- Social link preview. Replace https://YOUR-DOMAIN with your live URL -->
+  <!-- Social link preview -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Mark Zaki">
-  <meta property="og:title" content="Mark Zaki · Gameplay & Multiplayer Systems Engineer">
-  <meta property="og:description" content="Unity, C#, server-authoritative netcode, Souls-like combat, and modular architecture.">
-  <meta property="og:url" content="https://YOUR-DOMAIN/">
-  <meta property="og:image" content="https://YOUR-DOMAIN/assets/og-image.svg">
+  <meta property="og:title" content="Mark Zaki | Gameplay & Multiplayer Systems Engineer">
+  <meta property="og:description" content="Shipped mobile games, multiplayer systems, VR, combat, AI, and developer tools built with Unity and C#.">
+  <meta property="og:url" content="https://markzaki55.github.io/">
+  <meta property="og:image" content="https://markzaki55.github.io/assets/og-image.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Mark Zaki · Gameplay & Multiplayer Systems Engineer">
-  <meta name="twitter:description" content="Unity, C#, server-authoritative netcode, Souls-like combat, and modular architecture.">
-  <meta name="twitter:image" content="https://YOUR-DOMAIN/assets/og-image.svg">
+  <meta name="twitter:title" content="Mark Zaki | Gameplay & Multiplayer Systems Engineer">
+  <meta name="twitter:description" content="Shipped mobile games, multiplayer systems, VR, combat, AI, and developer tools built with Unity and C#.">
+  <meta name="twitter:image" content="https://markzaki55.github.io/assets/og-image.svg">
 </head>
 <body data-page="home">
 
-  <header class="site-head" id="site-head">
-    <div class="wrap site-head__inner">
-      <a class="brand" href="index.html" id="brand">
-        <span class="brand__mark">MZ</span>
-        <span class="brand__name">Mark <b>Zaki</b></span>
-      </a>
-      <nav class="nav" id="nav" aria-label="Primary">
-        <a href="#work">Work</a>
-        <a href="projects.html">All Projects</a>
-        <a href="#stack">Stack</a>
-        <a href="#contact" class="nav__touch">Get in touch</a>
-      </nav>
-      <a class="nav__cta" href="#contact">Get in touch</a>
-      <button class="nav__toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-
   <section class="hero">
     <div class="wrap">
-      <p class="mono hero__tag"><span class="dot">●</span> Open to new projects & collaborations</p>
-      <h1 class="hero__name" id="name"></h1>
-      <div class="hero__role">
-        <span>Multiplayer</span>
-        <span class="sep">·</span>
-        <span class="hero__rotator" id="rotator"></span>
+      <div class="hero__grid">
+        <div class="hero__headline">
+          <h1 id="name"></h1>
+          <p class="hero__byline" id="tagline"></p>
+          <p class="hero__statement" id="intro"></p>
+        </div>
+        <div class="actions" id="actions"></div>
       </div>
-      <p class="hero__intro" id="intro"></p>
-      <div class="stats" id="stats"></div>
-      <div class="actions" id="actions"></div>
     </div>
   </section>
 
   <main>
+    <section class="section section--alt" id="expertise">
+      <div class="wrap">
+        <div class="section__head">
+          <div>
+            <span class="section__index">01 / Expertise</span>
+            <h2 class="section__title">What I care about.</h2>
+          </div>
+          <p class="section__note">The parts of game development I enjoy thinking about, building, and improving.</p>
+        </div>
+        <div class="pillars" id="pillars"></div>
+        <div class="coretools">
+          <span class="coretools__label">Core tools</span>
+          <div class="stacklist" id="stacklist"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="work">
       <div class="wrap">
-        <div class="section__head reveal">
-          <span class="section__index">Featured</span>
-          <h2 class="section__title">Selected Work</h2>
+        <div class="section__head">
+          <div>
+            <span class="section__index">02 / Work</span>
+            <h2 class="section__title">Featured projects.</h2>
+          </div>
+          <p class="section__note">A closer look at the games and systems I have been building.</p>
         </div>
         <div class="projgrid" id="projects"></div>
-        <div class="allprojects reveal" id="all-projects" style="display:none">
+        <div class="allprojects" id="all-projects" style="display:none">
           <a class="btn btn--ghost" href="projects.html">
             All projects <span class="arrow">→</span>
           </a>
@@ -76,63 +76,17 @@
       </div>
     </section>
 
-    <section class="section section--alt">
-      <div class="wrap">
-        <div class="section__head reveal">
-          <span class="section__index">Services</span>
-          <h2 class="section__title">What I Do</h2>
-        </div>
-        <div class="pillars reveal" id="pillars"></div>
-      </div>
-    </section>
-
-    <section class="section" id="stack">
-      <div class="wrap">
-        <div class="section__head reveal">
-          <span class="section__index">Stack</span>
-          <h2 class="section__title">Technical Stack</h2>
-        </div>
-        <div class="stacklist reveal" id="stacklist"></div>
-      </div>
-    </section>
-
     <section class="section contact" id="contact">
-      <div class="wrap contact__grid">
-        <div class="contact__intro reveal">
-          <div class="section__head">
-            <span class="section__index">Contact</span>
-            <h2 class="section__title">Get in touch</h2>
+      <div class="wrap contact__simple">
+        <div class="section__head">
+          <div>
+            <span class="section__index">03 / Contact</span>
+            <h2 class="section__title">Get in touch.</h2>
           </div>
-          <p class="contact__lead">
-            Open to gameplay and multiplayer roles, freelance systems work, or
-            just a conversation about combat feel and netcode. Drop a message
-            below or reach out on any of these.
-          </p>
-          <div class="about">
-            <span class="about__avatar" aria-hidden="true">MZ</span>
-            <p class="about__text" id="about-text"></p>
-          </div>
-          <div class="socials" id="socials"></div>
         </div>
-
-        <form class="contact__form reveal" id="contact-form" novalidate>
-          <div class="field">
-            <label for="cf-name">Name</label>
-            <input id="cf-name" name="name" type="text" autocomplete="name" placeholder="Your name" required>
-          </div>
-          <div class="field">
-            <label for="cf-email">Email</label>
-            <input id="cf-email" name="email" type="email" autocomplete="email" placeholder="you@email.com" required>
-          </div>
-          <div class="field">
-            <label for="cf-message">Message</label>
-            <textarea id="cf-message" name="message" rows="5" placeholder="What can I help you build?" required></textarea>
-          </div>
-          <button class="btn btn--accent" type="submit">
-            Send it <span class="arrow">→</span>
-          </button>
-          <p class="contact__note" id="cf-note" role="status" aria-live="polite"></p>
-        </form>
+        <p class="contact__lead" id="about-text"></p>
+        <a class="btn btn--accent contact__email" id="contact-email" href="#">Email Mark <span class="arrow">→</span></a>
+        <div class="socials" id="socials"></div>
       </div>
     </section>
   </main>
