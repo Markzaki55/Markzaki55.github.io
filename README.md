@@ -17,7 +17,7 @@ Then open `http://localhost:8000`.
 Open `http://localhost:8000/admin.html` to edit:
 
 - Profile, hero copy, engineering focus, core tools, and contact copy
-- Social, email, résumé, and project links
+- Social, email, resume, and project links
 - Shared site colors
 - Projects, media galleries, write-ups, tags, and featured status
 - Drafts, JSON backups, `data.js` exports, and GitHub publishing

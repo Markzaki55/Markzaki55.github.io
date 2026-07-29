@@ -19,7 +19,7 @@
   --ink: #111111;
   --font-sans: "Space Grotesk", Arial, sans-serif;
   --font-heading: "Manrope", Arial, sans-serif;
-  --font-mono: Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-sans);
   --hero-text: #ffffff;
   --heading-text: #f2f0e9;
   --project-title: #f2f0e9;
@@ -131,7 +131,7 @@ video {
   margin-top: 26px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -176,7 +176,7 @@ video {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: .025em;
   transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s var(--ease);
 }
@@ -341,7 +341,7 @@ video {
   overflow: hidden;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .07em;
   text-overflow: ellipsis;
   text-transform: uppercase;
@@ -388,7 +388,7 @@ video {
   color: var(--muted);
   border: 0;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .055em;
   text-transform: uppercase;
   transition: color .2s ease, transform .25s var(--ease);
@@ -543,7 +543,7 @@ video {
   color: var(--muted);
   border: 0;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: .015em;
   transition: color .18s ease, background .18s ease;
 }
@@ -613,7 +613,7 @@ video {
   color: var(--muted);
   border: 1px solid var(--line);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .02em;
   transition: color .18s ease, border-color .18s ease, background .18s ease;
 }
@@ -646,7 +646,7 @@ video {
 .pagehead__sub {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .055em;
   text-align: center;
   text-transform: uppercase;
@@ -668,7 +668,7 @@ video {
   gap: 9px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .05em;
   text-transform: uppercase;
   transition: color .18s ease;
@@ -732,7 +732,7 @@ video {
   margin-inline: auto;
   color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .09em;
   text-align: center;
   text-transform: uppercase;
@@ -771,7 +771,7 @@ video {
   margin-top: 17px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .075em;
   text-transform: uppercase;
 }
@@ -930,7 +930,7 @@ video {
   margin: 2px 0 0;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
@@ -964,7 +964,7 @@ video {
   display: inline-block;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .08em;
   text-transform: uppercase;
   transition: color .18s ease;
@@ -995,7 +995,7 @@ video {
   margin-bottom: 7px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .08em;
   text-transform: uppercase;
 }
@@ -1045,7 +1045,7 @@ video {
   z-index: 1;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
@@ -1080,7 +1080,7 @@ video {
   background: rgba(11,11,12,.86);
   border: 1px solid var(--line);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: .08em;
 }
 
@@ -1124,7 +1124,7 @@ video {
   color: var(--ink);
   background: var(--accent);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
 }
 
@@ -1163,7 +1163,7 @@ video {
   min-height: 18px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .05em;
   text-transform: uppercase;
 }
@@ -1225,7 +1225,7 @@ video {
   color: var(--faint);
   background: var(--bg);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: .06em;
   text-align: center;
   text-transform: uppercase;
@@ -1242,7 +1242,7 @@ video {
   background: rgba(11,11,12,.9);
   border: 1px solid var(--line);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: .06em;
   line-height: 1;
 }
@@ -1335,7 +1335,7 @@ video {
   justify-self: center;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .05em;
   text-transform: uppercase;
 }
@@ -1397,7 +1397,7 @@ video {
   margin-bottom: 70px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .06em;
   text-transform: uppercase;
 }
@@ -1410,7 +1410,7 @@ video {
   margin-bottom: 14px;
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -1492,7 +1492,7 @@ video {
   margin-top: 5px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: .015em;
 }
@@ -1507,7 +1507,7 @@ video {
 .footer__links a {
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: .055em;
   text-transform: uppercase;
   transition: color .18s ease;
@@ -1523,7 +1523,7 @@ video {
   padding: 0 40px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   text-align: center;
 }
 

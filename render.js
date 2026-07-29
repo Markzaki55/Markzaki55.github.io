@@ -499,7 +499,7 @@ function renderHome() {
   const actions = document.getElementById("actions");
   const L = PROFILE.links;
   actions.appendChild(makeLink("View work", "#work", "btn btn--accent"));
-  if (L.resume) actions.appendChild(makeLink("Résumé", L.resume, "btn"));
+  if (L.resume) actions.appendChild(makeLink("Resume", L.resume, "btn"));
   else if (L.email) actions.appendChild(makeLink("Email me", L.email.trim(), "btn"));
 
   // pillars

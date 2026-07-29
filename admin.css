@@ -17,8 +17,8 @@
   --ok: #9acb76;
   --warn: #ff7868;
   --radius: 2px;
-  --mono: Arial, Helvetica, sans-serif;
   --sans: "Space Grotesk", Arial, sans-serif;
+  --mono: var(--sans);
 }
 
 html {
@@ -1094,6 +1094,36 @@ pre.export {
   color: var(--warn);
   font-family: var(--mono);
   font-size: 9px;
+}
+
+/* Keep editor controls readable without making the workspace bulky. */
+:is(
+  .top__status,
+  .top button,
+  .side::before,
+  .preview__label,
+  .tab-sub,
+  .panel > h3,
+  .f__label,
+  .upload-control__button,
+  .upload-control__status,
+  .note,
+  .addbtn,
+  .pitem__meta,
+  .typebtns button,
+  .media-item__preview,
+  .media-item__index,
+  .media-item__meta,
+  .media-item__featured,
+  .visual-preset__font,
+  .font-control__head,
+  .theme-note,
+  .color-choice__label,
+  .export,
+  .lock__box button,
+  .lock__err
+) {
+  font-size: 10px;
 }
 
 /* Responsive editor ------------------------------------------------------- */
