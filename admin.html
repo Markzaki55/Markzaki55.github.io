@@ -6,14 +6,14 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="robots" content="noindex, nofollow">
   <title>Studio | Site Editor</title>
-  <meta name="theme-color" content="#0f100e">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Fira+Code:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&family=Sora:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&family=Source+Sans+3:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0b0b0c">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Fira+Code:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&family=Sora:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&family=Source+Sans+3:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0f100e; --panel:#191a17; --panel2:#151613; --line:#31322c; --line-soft:#24251f;
+      --bg:#0b0b0c; --panel:#171719; --panel2:#111113; --line:#333338; --line-soft:#252528;
       --text:#f2f0e9; --muted:#aaa99f; --faint:#74756c; --accent:#ffae3d; --accent-deep:#a67726;
-      --ok:#7fb069; --warn:#e06b5e; --radius:8px; --mono:"IBM Plex Mono",monospace; --sans:"Space Grotesk",system-ui,sans-serif;
+      --ok:#7fb069; --warn:#e06b5e; --radius:8px; --mono:Arial,Helvetica,sans-serif; --sans:"Space Grotesk",system-ui,sans-serif;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
@@ -22,7 +22,7 @@
 
     /* ---- top bar ---- */
     .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:16px;
-      padding:12px 20px;background:rgba(15,16,14,.95);border-bottom:1px solid var(--line)}
+      padding:12px 20px;background:rgba(11,11,12,.95);border-bottom:1px solid var(--line)}
     .top__brand{font-family:var(--mono);font-weight:700;letter-spacing:.04em}
     .top__brand b{color:var(--accent)}
     .top__status{font-family:var(--mono);font-size:12px;color:var(--faint)}
@@ -274,7 +274,7 @@
       state.THEME = Object.assign(clone(DEFAULTS.THEME), state.THEME || {});
       state.PROJECTS = state.PROJECTS || [];
       if ((state.PROFILE.layoutVersion || 0) < DEFAULTS.PROFILE.layoutVersion) {
-        ["tagline", "intro", "about", "pillars", "stack", "footerTagline"].forEach(function(key){
+        ["tagline", "intro", "about", "pillars", "stack"].forEach(function(key){
           state.PROFILE[key] = clone(DEFAULTS.PROFILE[key]);
         });
         state.PROFILE.layoutVersion = DEFAULTS.PROFILE.layoutVersion;
@@ -296,8 +296,19 @@
       if ((state.PROFILE.copyVersion || 0) < (DEFAULTS.PROFILE.copyVersion || 0)) {
         state.PROFILE.intro = DEFAULTS.PROFILE.intro;
         state.PROFILE.about = DEFAULTS.PROFILE.about;
+        state.PROFILE.footerTagline = DEFAULTS.PROFILE.footerTagline;
         state.PROFILE.copyVersion = DEFAULTS.PROFILE.copyVersion;
       }
+      if ((state.PROFILE.typeVersion || 0) < (DEFAULTS.PROFILE.typeVersion || 0)) {
+        state.PROFILE.typeVersion = DEFAULTS.PROFILE.typeVersion;
+      }
+      if ((state.PROFILE.themeFoundationVersion || 0) < (DEFAULTS.PROFILE.themeFoundationVersion || 0)) {
+        ["bg", "bg2", "surface", "surface2", "line", "lineSoft"].forEach(function(key){
+          state.THEME[key] = DEFAULTS.THEME[key];
+        });
+        state.PROFILE.themeFoundationVersion = DEFAULTS.PROFILE.themeFoundationVersion;
+      }
+      delete state.THEME.fontMono;
       // Refresh known default palettes while preserving custom themes and font choices.
       if (
         (state.THEME.bg === "#0b0c0d" && state.THEME.accent === "#E8A33D") ||
@@ -705,6 +716,114 @@
       head("Visual System", "Control the site fonts and color system. Changes appear in the preview after a moment.");
       var T = state.THEME;
 
+      var visualPresets = [
+        {
+          name:"Warm Graphite",
+          note:"Your current grey and dark yellow system.",
+          theme:{
+            bg:"#0b0b0c", bg2:"#0b0b0c", surface:"#171719", surface2:"#1e1e21",
+            line:"#333338", lineSoft:"#252528", text:"#f2f0e9", muted:"#aaa99f",
+            faint:"#74756c", accent:"#ffae3d", accentSoft:"#ffe875", accentDeep:"#a67726",
+            fontSans:"\"Space Grotesk\", Arial, sans-serif", fontHeading:"\"Manrope\", Arial, sans-serif",
+            heroText:"#ffffff",
+            headingText:"#f2f0e9", projectTitle:"#f2f0e9", bodyText:"#aaa99f"
+          }
+        },
+        {
+          name:"Deep Graphite",
+          note:"Cool graphite with a soft silver accent.",
+          theme:{
+            bg:"#0c0c0d", bg2:"#0c0c0d", surface:"#18181b", surface2:"#202024",
+            line:"#36363d", lineSoft:"#28282d", text:"#f0f2f4", muted:"#a7acb3",
+            faint:"#7b828b", accent:"#b8bec7", accentSoft:"#d8dce1", accentDeep:"#6f7782",
+            fontSans:"\"Inter\", Arial, sans-serif", fontHeading:"\"Manrope\", Arial, sans-serif",
+            heroText:"#ffffff",
+            headingText:"#f0f2f4", projectTitle:"#f0f2f4", bodyText:"#a7acb3"
+          }
+        },
+        {
+          name:"Dark Stone",
+          note:"Warm stone grey with a quiet neutral accent.",
+          theme:{
+            bg:"#0d0d0d", bg2:"#0d0d0d", surface:"#1a1a1a", surface2:"#222222",
+            line:"#3a3a3a", lineSoft:"#2a2a2a", text:"#f1efe9", muted:"#aca79c",
+            faint:"#807b71", accent:"#c1b79f", accentSoft:"#ddd5c4", accentDeep:"#776e5b",
+            fontSans:"\"IBM Plex Sans\", Arial, sans-serif", fontHeading:"\"Manrope\", Arial, sans-serif",
+            heroText:"#ffffff",
+            headingText:"#f1efe9", projectTitle:"#f1efe9", bodyText:"#aca79c"
+          }
+        },
+        {
+          name:"Soft Black",
+          note:"Simple black surfaces with a soft grey accent.",
+          theme:{
+            bg:"#101010", bg2:"#101010", surface:"#1b1b1b", surface2:"#232323",
+            line:"#383838", lineSoft:"#292929", text:"#f2f2f2", muted:"#ababab",
+            faint:"#7c7c7c", accent:"#d0d0d0", accentSoft:"#ececec", accentDeep:"#777777",
+            fontSans:"\"DM Sans\", Arial, sans-serif", fontHeading:"\"DM Sans\", Arial, sans-serif",
+            heroText:"#ffffff",
+            headingText:"#f2f2f2", projectTitle:"#f2f2f2", bodyText:"#ababab"
+          }
+        },
+        {
+          name:"Smoke",
+          note:"Smoky black with balanced grey contrast.",
+          theme:{
+            bg:"#111112", bg2:"#111112", surface:"#1d1d20", surface2:"#252529",
+            line:"#3c3c42", lineSoft:"#2c2c31", text:"#f1f1f3", muted:"#aaaab0",
+            faint:"#7d7d85", accent:"#b9b9c0", accentSoft:"#d8d8dd", accentDeep:"#71717a",
+            fontSans:"\"Plus Jakarta Sans\", Arial, sans-serif", fontHeading:"\"Manrope\", Arial, sans-serif",
+            heroText:"#ffffff",
+            headingText:"#f1f1f3", projectTitle:"#f1f1f3", bodyText:"#aaaab0"
+          }
+        },
+        {
+          name:"Monochrome",
+          note:"Neutral black, white, and steel grey.",
+          theme:{
+            bg:"#0b0b0c", bg2:"#0b0b0c", surface:"#161618", surface2:"#1d1d20",
+            line:"#343438", lineSoft:"#252528", text:"#f3f4f5", muted:"#afb3b8",
+            faint:"#7d838b", accent:"#c8cbd0", accentSoft:"#e1e3e6", accentDeep:"#777d85",
+            fontSans:"\"Work Sans\", Arial, sans-serif", fontHeading:"\"Manrope\", Arial, sans-serif",
+            heroText:"#ffffff",
+            headingText:"#f3f4f5", projectTitle:"#f3f4f5", bodyText:"#afb3b8"
+          }
+        }
+      ];
+
+      function presetIsActive(preset){
+        return Object.keys(preset.theme).every(function(key){ return T[key] === preset.theme[key]; });
+      }
+
+      var presetGrid = h("div",{class:"visual-presets"});
+      visualPresets.forEach(function(preset){
+        var active = presetIsActive(preset);
+        var swatches = ["bg","surface","text","accent"].map(function(key){
+          var swatch = h("span",{class:"visual-preset__swatch"});
+          swatch.style.background = preset.theme[key];
+          return swatch;
+        });
+        presetGrid.appendChild(h("button",{
+          class:"visual-preset" + (active ? " is-active" : ""),
+          attrs:{type:"button","aria-pressed":active ? "true" : "false"},
+          on:{click:function(){
+            Object.keys(preset.theme).forEach(function(key){ T[key] = preset.theme[key]; });
+            reRender();
+          }}
+        },[
+          h("span",{class:"visual-preset__top"},[
+            h("strong",{text:preset.name}),
+            h("span",{class:"visual-preset__swatches"},swatches)
+          ]),
+          h("span",{class:"visual-preset__note",text:preset.note}),
+          h("span",{class:"visual-preset__font",text:preset.theme.fontSans.replace(/\"/g,"").split(",")[0]})
+        ]));
+      });
+      mainEl.appendChild(panel("Visual presets", [
+        h("div",{class:"note",text:"Each preset changes the complete palette and typography. You can still adjust individual values below."}),
+        presetGrid
+      ]));
+
       function fontControl(label, key, options, sample){
         var preview = h("div",{class:"font-preview"},[
           h("span",{class:"font-preview__primary",text:sample}),
@@ -793,31 +912,18 @@
         {value:"\"Playfair Display\", Georgia, serif",label:"Playfair Display"},
         {value:"Georgia, \"Times New Roman\", serif",label:"Georgia"}
       ]);
-      var monoFonts = [
-        {value:"\"IBM Plex Mono\", Consolas, monospace",label:"IBM Plex Mono"},
-        {value:"\"JetBrains Mono\", Consolas, monospace",label:"JetBrains Mono"},
-        {value:"\"Fira Code\", Consolas, monospace",label:"Fira Code"},
-        {value:"\"Source Code Pro\", Consolas, monospace",label:"Source Code Pro"},
-        {value:"\"Roboto Mono\", Consolas, monospace",label:"Roboto Mono"},
-        {value:"\"Space Mono\", Consolas, monospace",label:"Space Mono"},
-        {value:"ui-monospace, SFMono-Regular, Consolas, monospace",label:"System Mono"},
-        {value:"Consolas, \"Courier New\", monospace",label:"Consolas"},
-        {value:"\"Courier New\", monospace",label:"Courier New"}
-      ];
-
       mainEl.appendChild(panel("Typography", [
         fontControl("Body font", "fontSans", sansFonts, "Clear, direct, and easy to read."),
-        fontControl("Heading font", "fontHeading", headingFonts, "Mark Zaki"),
-        fontControl("Mono and UI font", "fontMono", monoFonts, "UNITY / C# / SYSTEMS")
+        fontControl("Heading font", "fontHeading", headingFonts, "Mark Zaki")
       ]));
 
       var colorChoices = [
-        {value:"#0f100e",label:"Portfolio black"},
-        {value:"#151613",label:"Portfolio dark gray"},
-        {value:"#191a17",label:"Portfolio surface"},
-        {value:"#20211d",label:"Portfolio raised surface"},
-        {value:"#31322c",label:"Portfolio border"},
-        {value:"#24251f",label:"Portfolio soft border"},
+        {value:"#0b0b0c",label:"Portfolio black"},
+        {value:"#111113",label:"Dark gray"},
+        {value:"#171719",label:"Portfolio surface"},
+        {value:"#1e1e21",label:"Portfolio raised surface"},
+        {value:"#333338",label:"Portfolio border"},
+        {value:"#252528",label:"Portfolio soft border"},
         {value:"#f2f0e9",label:"Portfolio white"},
         {value:"#aaa99f",label:"Portfolio muted text"},
         {value:"#74756c",label:"Portfolio caption"},

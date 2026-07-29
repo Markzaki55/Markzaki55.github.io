@@ -57,7 +57,7 @@ const PROFILE = {
   ],
   "links": {
     "github": "https://github.com/Markzaki55",
-    "resume": "assets/resume.pdf",
+    "resume": "assets/MARK_ZAKI_Resume.pdf",
     "linkedin": "https://www.linkedin.com/in/markzakimalak",
     "email": "mailto:markzakimalakzaki@gmail.com "
   },
@@ -66,43 +66,51 @@ const PROFILE = {
     "C#",
     "Photon PUN 2",
     "Photon Fusion",
+    "FishNet",
     "OpenXR",
     "XR Interaction Toolkit",
     "ScriptableObjects",
     "Animation Rigging",
     "Cinemachine 3",
-    "Unity Input System",
+    "Backend Integration",
+    "UGUI",
+    "UI Toolkit",
+    "Playfab",
+    "Git",
+    "Custom .Net backend",
+    "Performance Optimization",
     "REST APIs",
     "MVC / MVP"
   ],
-  "copyright": "",
-  "footerTagline": "Always happy to talk game systems.",
+  "copyright": "@ 2026 Mark Zaki",
   "layoutVersion": 4,
   "expertiseVersion": 1,
   "projectDataVersion": 1,
-  "copyVersion": 1
+  "copyVersion": 3,
+  "footerTagline": "Always happy to talk game systems.",
+  "typeVersion": 2,
+  "themeFoundationVersion": 1
 };
 
 const THEME = {
-  "bg": "#0f100e",
-  "bg2": "#151613",
-  "surface": "#191a17",
-  "surface2": "#20211d",
-  "line": "#31322c",
-  "lineSoft": "#24251f",
-  "text": "#f2f0e9",
-  "muted": "#aaa99f",
-  "faint": "#74756c",
-  "accent": "#ffae3d",
-  "accentSoft": "#ffe875",
-  "accentDeep": "#a67726",
-  "fontSans": "\"Space Grotesk\", Arial, sans-serif",
-  "fontHeading": "\"Manrope\", Arial, sans-serif",
-  "fontMono": "\"IBM Plex Mono\", Consolas, monospace",
+  "bg": "#101010",
+  "bg2": "#101010",
+  "surface": "#1b1b1b",
+  "surface2": "#232323",
+  "line": "#383838",
+  "lineSoft": "#292929",
+  "text": "#f2f2f2",
+  "muted": "#ababab",
+  "faint": "#7c7c7c",
+  "accent": "#d0d0d0",
+  "accentSoft": "#ececec",
+  "accentDeep": "#777777",
+  "fontSans": "\"DM Sans\", Arial, sans-serif",
+  "fontHeading": "\"DM Sans\", Arial, sans-serif",
   "heroText": "#ffffff",
-  "headingText": "#f2f0e9",
-  "projectTitle": "#f2f0e9",
-  "bodyText": "#aaa99f"
+  "headingText": "#f2f2f2",
+  "projectTitle": "#f2f2f2",
+  "bodyText": "#ababab"
 };
 
 const PROJECTS = [
@@ -471,11 +479,12 @@ const PROJECTS = [
     "techStack": "Unity, C#, Photon Fusion",
     "media": [
       {
-        "type": "text",
+        "type": "youtube",
         "label": "RACE",
         "sub": "Full multiplayer race and platforming gameplay",
         "label2": "Race Gameplay",
-        "featured": true
+        "featured": true,
+        "id": "wZNyxJ58oNU"
       },
       {
         "type": "text",

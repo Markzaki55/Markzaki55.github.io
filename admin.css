@@ -4,11 +4,11 @@
    ========================================================================== */
 
 :root {
-  --bg: #0f100e;
-  --panel: #191a17;
-  --panel2: #151613;
-  --line: #31322c;
-  --line-soft: #24251f;
+  --bg: #0b0b0c;
+  --panel: #171719;
+  --panel2: #111113;
+  --line: #333338;
+  --line-soft: #252528;
   --text: #f2f0e9;
   --muted: #aaa99f;
   --faint: #74756c;
@@ -17,7 +17,7 @@
   --ok: #9acb76;
   --warn: #ff7868;
   --radius: 2px;
-  --mono: "IBM Plex Mono", Consolas, monospace;
+  --mono: Arial, Helvetica, sans-serif;
   --sans: "Space Grotesk", Arial, sans-serif;
 }
 
@@ -65,7 +65,7 @@ select:focus-visible {
   align-items: center;
   gap: 14px;
   padding: 10px 16px;
-  background: rgba(15, 16, 14, .95);
+  background: rgba(11, 11, 12, .95);
   border-bottom: 1px solid var(--line);
 }
 
@@ -811,6 +811,81 @@ textarea.in {
   border-left: 1px solid var(--accent-deep);
 }
 
+.visual-presets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.visual-preset {
+  min-width: 0;
+  padding: 14px;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  text-align: left;
+  transition: border-color .16s ease, background .16s ease;
+}
+
+.visual-preset:hover {
+  color: var(--text);
+  background: var(--panel2);
+  border-color: var(--faint);
+}
+
+.visual-preset.is-active {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.visual-preset__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.visual-preset__top strong {
+  overflow: hidden;
+  color: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visual-preset__swatches {
+  flex: none;
+  display: flex;
+  gap: 3px;
+}
+
+.visual-preset__swatch {
+  width: 13px;
+  height: 13px;
+  display: block;
+  border: 1px solid rgba(255,255,255,.14);
+}
+
+.visual-preset__note {
+  min-height: 34px;
+  display: block;
+  margin-top: 9px;
+  color: var(--faint);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.visual-preset__font {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
 .font-control {
   margin-bottom: 14px;
   padding: 16px;
@@ -1119,6 +1194,10 @@ pre.export {
   }
 
   .grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .visual-presets {
     grid-template-columns: 1fr;
   }
 

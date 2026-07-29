@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-labelledby="title">
   <title id="title">Mark Zaki</title>
-  <rect width="80" height="80" rx="10" fill="#0f100e"/>
+  <rect width="80" height="80" rx="10" fill="#0b0b0c"/>
   <g transform="translate(0 8)">
     <path d="M4 44V12h7l11 14 11-14h7v32h-8V25L22 38 12 25v19H4Z"
           fill="#f2f0e9"/>

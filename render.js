@@ -70,11 +70,12 @@ async function hydrateFromDraft() {
     ? JSON.parse(JSON.stringify(THEME))
     : null;
   let useDraftProjects = true;
+  let refreshThemeFoundation = false;
   if (d.PROFILE && typeof PROFILE !== "undefined") {
     const profileDefaults = JSON.parse(JSON.stringify(PROFILE));
     Object.assign(PROFILE, d.PROFILE);
     if ((d.PROFILE.layoutVersion || 0) < profileDefaults.layoutVersion) {
-      ["tagline", "intro", "about", "pillars", "stack", "footerTagline"].forEach((key) => {
+      ["tagline", "intro", "about", "pillars", "stack"].forEach((key) => {
         PROFILE[key] = JSON.parse(JSON.stringify(profileDefaults[key]));
       });
       PROFILE.layoutVersion = profileDefaults.layoutVersion;
@@ -98,7 +99,15 @@ async function hydrateFromDraft() {
     if ((d.PROFILE.copyVersion || 0) < (profileDefaults.copyVersion || 0)) {
       PROFILE.intro = profileDefaults.intro;
       PROFILE.about = profileDefaults.about;
+      PROFILE.footerTagline = profileDefaults.footerTagline;
       PROFILE.copyVersion = profileDefaults.copyVersion;
+    }
+    if ((d.PROFILE.typeVersion || 0) < (profileDefaults.typeVersion || 0)) {
+      PROFILE.typeVersion = profileDefaults.typeVersion;
+    }
+    if ((d.PROFILE.themeFoundationVersion || 0) < (profileDefaults.themeFoundationVersion || 0)) {
+      PROFILE.themeFoundationVersion = profileDefaults.themeFoundationVersion;
+      refreshThemeFoundation = true;
     }
   }
   const hasLegacyDefaultPalette =
@@ -115,6 +124,11 @@ async function hydrateFromDraft() {
         "heroText", "headingText", "projectTitle", "bodyText"
       ].forEach((key) => { THEME[key] = themeDefaults[key]; });
     }
+    if (refreshThemeFoundation && themeDefaults) {
+      ["bg", "bg2", "surface", "surface2", "line", "lineSoft"]
+        .forEach((key) => { THEME[key] = themeDefaults[key]; });
+    }
+    delete THEME.fontMono;
   }
   if (useDraftProjects && Array.isArray(d.PROJECTS) && typeof PROJECTS !== "undefined") {
     PROJECTS.length = 0;
@@ -127,7 +141,7 @@ const THEME_VARS = {
   bg: "--bg", bg2: "--bg-2", surface: "--surface", surface2: "--surface-2",
   line: "--line", lineSoft: "--line-soft", text: "--text", muted: "--muted",
   faint: "--faint", accent: "--accent", accentSoft: "--accent-soft", accentDeep: "--accent-deep",
-  fontSans: "--font-sans", fontHeading: "--font-heading", fontMono: "--font-mono",
+  fontSans: "--font-sans", fontHeading: "--font-heading",
   heroText: "--hero-text", headingText: "--heading-text",
   projectTitle: "--project-title", bodyText: "--body-text",
 };
@@ -492,7 +506,7 @@ function renderHome() {
   const pillars = document.getElementById("pillars");
   PROFILE.pillars.forEach((p, idx) => {
     const card = el("div", "pillar");
-    card.appendChild(el("div", "pillar__num", String(idx + 1).padStart(2, "0")));
+    card.appendChild(el("div", "pillar__num number-label", String(idx + 1).padStart(2, "0")));
     card.appendChild(el("div", "pillar__title", esc(p.title)));
     card.appendChild(el("div", "pillar__body", esc(p.body)));
     pillars.appendChild(card);
@@ -647,7 +661,7 @@ function renderProject() {
   if (projectIndex > -1) {
     topbar.appendChild(el(
       "span",
-      "detail__position",
+      "detail__position number-label",
       `Project ${String(projectIndex + 1).padStart(2, "0")} / ${String(publicProjects.length).padStart(2, "0")}`
     ));
   }
@@ -703,7 +717,7 @@ function renderProject() {
   (p.sections || []).forEach((sec, sectionIndex) => {
     const s = el("div", "dsection");
     const head = el("div", "dsection__head");
-    head.appendChild(el("span", "dsection__num", String(sectionIndex + 1).padStart(2, "0")));
+    head.appendChild(el("span", "dsection__num number-label", String(sectionIndex + 1).padStart(2, "0")));
     head.appendChild(el("h2", null, esc(sec.heading)));
     s.appendChild(head);
 
@@ -824,7 +838,6 @@ function renderFooter() {
   add("Email", L.email);
   add("Resume", L.resume);
 
-  // footer tagline
   const ft = document.querySelector(".footer__tagline");
   if (ft && PROFILE.footerTagline) ft.textContent = PROFILE.footerTagline;
 

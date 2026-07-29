@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
-  <rect width="1200" height="630" fill="#0f100e"/>
+  <rect width="1200" height="630" fill="#0b0b0c"/>
 
   <g transform="translate(72 66) scale(1.25)">
     <path d="M4 44V12h7l11 14 11-14h7v32h-8V25L22 38 12 25v19H4Z"
@@ -22,7 +22,7 @@
         letter-spacing="-1"
         fill="#aaa99f">Gameplay &amp; Multiplayer Systems Engineer</text>
 
-  <path d="M72 500H1128" stroke="#31322c"/>
+  <path d="M72 500H1128" stroke="#333338"/>
   <text x="72" y="548"
         font-family="Consolas, monospace"
         font-size="15"
