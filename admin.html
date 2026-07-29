@@ -293,6 +293,11 @@
         state.PROJECTS = clone(DEFAULTS.PROJECTS);
         state.PROFILE.projectDataVersion = DEFAULTS.PROFILE.projectDataVersion;
       }
+      if ((state.PROFILE.copyVersion || 0) < (DEFAULTS.PROFILE.copyVersion || 0)) {
+        state.PROFILE.intro = DEFAULTS.PROFILE.intro;
+        state.PROFILE.about = DEFAULTS.PROFILE.about;
+        state.PROFILE.copyVersion = DEFAULTS.PROFILE.copyVersion;
+      }
       // Refresh known default palettes while preserving custom themes and font choices.
       if (
         (state.THEME.bg === "#0b0c0d" && state.THEME.accent === "#E8A33D") ||

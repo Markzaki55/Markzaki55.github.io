@@ -95,6 +95,11 @@ async function hydrateFromDraft() {
       useDraftProjects = false;
       PROFILE.projectDataVersion = profileDefaults.projectDataVersion;
     }
+    if ((d.PROFILE.copyVersion || 0) < (profileDefaults.copyVersion || 0)) {
+      PROFILE.intro = profileDefaults.intro;
+      PROFILE.about = profileDefaults.about;
+      PROFILE.copyVersion = profileDefaults.copyVersion;
+    }
   }
   const hasLegacyDefaultPalette =
     d.THEME && (

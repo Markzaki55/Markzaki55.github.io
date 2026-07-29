@@ -13,8 +13,8 @@ const PROFILE = {
     "AI Systems"
   ],
   "tagline": "Gameplay & Multiplayer Systems Engineer",
-  "about": "I have led gameplay teams and built systems for shipped mobile games, multiplayer shooters, VR platforms, and personal frameworks. If you need someone who can take ownership and work well across disciplines, I would be happy to talk.",
-  "intro": "I build Unity games from the systems up: multiplayer modes, combat and AI, VR interaction, live-game tools, and the architecture teams use to keep shipping.",
+  "about": "I enjoy solving tricky game systems and working with people who care about the details. If you are building something interesting and think I could help, feel free to get in touch.",
+  "intro": "I make Unity games with a focus on how they feel and how they hold together, from multiplayer and combat to VR interactions and the tools behind them.",
   "stats": [
     {
       "value": "Unity / C#",
@@ -79,7 +79,8 @@ const PROFILE = {
   "footerTagline": "Always happy to talk game systems.",
   "layoutVersion": 4,
   "expertiseVersion": 1,
-  "projectDataVersion": 1
+  "projectDataVersion": 1,
+  "copyVersion": 1
 };
 
 const THEME = {
