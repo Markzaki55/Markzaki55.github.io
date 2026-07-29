@@ -6,14 +6,14 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="robots" content="noindex, nofollow">
   <title>Studio | Site Editor</title>
-  <meta name="theme-color" content="#0d0f12">
+  <meta name="theme-color" content="#0f100e">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Fira+Code:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&family=Sora:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&family=Source+Sans+3:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0d0f12; --panel:#171b21; --panel2:#111419; --line:#2c323b; --line-soft:#222831;
-      --text:#f1f3f5; --muted:#a6acb5; --faint:#757d89; --accent:#d3a465; --accent-deep:#80603a;
-      --ok:#7fb069; --warn:#e06b5e; --radius:8px; --mono:"JetBrains Mono",monospace; --sans:"Sora",system-ui,sans-serif;
+      --bg:#0f100e; --panel:#191a17; --panel2:#151613; --line:#31322c; --line-soft:#24251f;
+      --text:#f2f0e9; --muted:#aaa99f; --faint:#74756c; --accent:#ffae3d; --accent-deep:#a67726;
+      --ok:#7fb069; --warn:#e06b5e; --radius:8px; --mono:"IBM Plex Mono",monospace; --sans:"Space Grotesk",system-ui,sans-serif;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
@@ -22,7 +22,7 @@
 
     /* ---- top bar ---- */
     .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:16px;
-      padding:12px 20px;background:rgba(11,12,13,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+      padding:12px 20px;background:rgba(15,16,14,.95);border-bottom:1px solid var(--line)}
     .top__brand{font-family:var(--mono);font-weight:700;letter-spacing:.04em}
     .top__brand b{color:var(--accent)}
     .top__status{font-family:var(--mono);font-size:12px;color:var(--faint)}
@@ -32,7 +32,7 @@
       border:1px solid var(--line);background:var(--panel);color:var(--text);transition:.16s}
     .top button:hover{border-color:var(--accent-deep);color:var(--accent)}
     .top button.primary{background:var(--accent);color:#0a0a0b;border-color:var(--accent);font-weight:600}
-    .top button.primary:hover{color:#0a0a0b;filter:brightness(1.06)}
+    .top button.primary:hover{color:#0a0a0b}
 
     /* ---- layout ---- */
     .shell{display:grid;grid-template-columns:190px minmax(0,1fr) minmax(0,520px);min-height:calc(100vh - 53px)}
@@ -58,7 +58,7 @@
     .f__hint{display:block;font-size:11px;color:var(--faint);margin-top:5px}
     .in{width:100%;font-family:var(--sans);font-size:14px;color:var(--text);background:var(--bg);
       border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;line-height:1.5}
-    .in:focus{outline:none;border-color:var(--accent-deep);box-shadow:0 0 0 3px rgba(211,164,101,.1)}
+    .in:focus{outline:none;border-color:var(--accent-deep);box-shadow:0 0 0 3px rgba(255,174,61,.1)}
     textarea.in{resize:vertical;min-height:64px}
     .in--mono{font-family:var(--mono);font-size:13px}
     .row{display:flex;gap:12px;align-items:flex-end;margin-bottom:12px}
@@ -161,7 +161,77 @@
   (function(){
     "use strict";
     var DRAFT_KEY = "mzPortfolioDraft";
+    var DRAFT_DB_NAME = "mzPortfolioStudio";
+    var DRAFT_STORE = "drafts";
     var PASS_KEY  = "mzAdminPassHash";
+
+    function openDraftDb(){
+      return new Promise(function(resolve, reject){
+        if (!window.indexedDB) { reject(new Error("IndexedDB is not available.")); return; }
+        var request = indexedDB.open(DRAFT_DB_NAME, 1);
+        request.onupgradeneeded = function(){
+          var db = request.result;
+          if (!db.objectStoreNames.contains(DRAFT_STORE)) db.createObjectStore(DRAFT_STORE);
+        };
+        request.onsuccess = function(){ resolve(request.result); };
+        request.onerror = function(){ reject(request.error || new Error("Could not open draft storage.")); };
+      });
+    }
+    function readDraftFromDb(){
+      return openDraftDb().then(function(db){
+        return new Promise(function(resolve, reject){
+          var tx = db.transaction(DRAFT_STORE, "readonly");
+          var request = tx.objectStore(DRAFT_STORE).get(DRAFT_KEY);
+          request.onsuccess = function(){ resolve(request.result || null); };
+          request.onerror = function(){ reject(request.error || new Error("Could not read the saved draft.")); };
+          tx.oncomplete = function(){ db.close(); };
+        });
+      });
+    }
+    function writeDraftToDb(value){
+      return openDraftDb().then(function(db){
+        return new Promise(function(resolve, reject){
+          var tx = db.transaction(DRAFT_STORE, "readwrite");
+          tx.objectStore(DRAFT_STORE).put(value, DRAFT_KEY);
+          tx.oncomplete = function(){ db.close(); resolve(); };
+          tx.onerror = function(){ db.close(); reject(tx.error || new Error("Could not save the draft.")); };
+          tx.onabort = function(){ db.close(); reject(tx.error || new Error("Draft save was interrupted.")); };
+        });
+      });
+    }
+    function removeDraftFromDb(){
+      return openDraftDb().then(function(db){
+        return new Promise(function(resolve, reject){
+          var tx = db.transaction(DRAFT_STORE, "readwrite");
+          tx.objectStore(DRAFT_STORE).delete(DRAFT_KEY);
+          tx.oncomplete = function(){ db.close(); resolve(); };
+          tx.onerror = function(){ db.close(); reject(tx.error || new Error("Could not remove the draft.")); };
+        });
+      });
+    }
+    function hasEmbeddedMedia(value){
+      if (typeof value === "string") return value.indexOf("data:image/") === 0;
+      if (!value || typeof value !== "object") return false;
+      if (Array.isArray(value)) return value.some(hasEmbeddedMedia);
+      return Object.keys(value).some(function(key){ return hasEmbeddedMedia(value[key]); });
+    }
+    function persistDraft(value){
+      var localSaved = false;
+      try {
+        if (hasEmbeddedMedia(value)) {
+          localStorage.removeItem(DRAFT_KEY);
+        } else {
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(value));
+          localSaved = true;
+        }
+      } catch(e) {
+        try { localStorage.removeItem(DRAFT_KEY); } catch(_){}
+      }
+      return writeDraftToDb(value).catch(function(err){
+        if (localSaved) return;
+        throw err;
+      });
+    }
 
     /* ---------- tiny DOM helper ---------- */
     function h(tag, opts, kids){
@@ -197,9 +267,7 @@
       PROJECTS:(typeof PROJECTS !== "undefined") ? clone(PROJECTS): []
     };
     var state;
-    (function init(){
-      var draft = null;
-      try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch(e){}
+    function initializeState(draft){
       state = draft && draft.PROFILE ? draft : clone(DEFAULTS);
       // make sure containers exist
       state.PROFILE = state.PROFILE || {};
@@ -236,23 +304,43 @@
           "heroText", "headingText", "projectTitle", "bodyText"
         ].forEach(function(key){ state.THEME[key] = DEFAULTS.THEME[key]; });
       }
-    })();
+    }
+    var localDraft = null;
+    try { localDraft = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch(e){}
+    initializeState(localDraft);
 
-    var statusEl, mainEl, previewFrame, previewPage, previewBox, savedTimer, prevTimer;
+    var statusEl, mainEl, previewFrame, previewPage, previewBox, savedTimer, prevTimer, persistTimer;
     var GH_KEY = "mzGitHubSettings";
     function loadGitHubSettings(){ try { return JSON.parse(localStorage.getItem(GH_KEY) || "null"); } catch(e){ return null; } }
     function saveGitHubSettings(s){ localStorage.setItem(GH_KEY, JSON.stringify(s)); }
     function utf8ToBase64(str){
       var bytes = new TextEncoder().encode(str);
-      var bin = Array.from(bytes, function(b){ return String.fromCharCode(b); }).join("");
+      var bin = "";
+      var chunkSize = 32768;
+      for (var i = 0; i < bytes.length; i += chunkSize) {
+        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+      }
       return btoa(bin);
     }
     function setStatus(txt, ok){ if(!statusEl) return; statusEl.textContent = txt; statusEl.className = "top__status" + (ok?" saved":""); }
+    function flushDraft(){
+      clearTimeout(persistTimer);
+      persistTimer = null;
+      return persistDraft(state).then(function(){
+        setStatus("saved", true);
+        clearTimeout(savedTimer);
+        savedTimer = setTimeout(function(){ setStatus("draft active"); }, 1600);
+        clearTimeout(prevTimer);
+        prevTimer = setTimeout(refreshPreview, 120);
+      }).catch(function(err){
+        console.error(err);
+        setStatus("draft save failed", false);
+      });
+    }
     function save(){
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
-      setStatus("saved ✓", true);
-      clearTimeout(savedTimer); savedTimer = setTimeout(function(){ setStatus("draft active"); }, 1200);
-      clearTimeout(prevTimer); prevTimer = setTimeout(refreshPreview, 700);
+      setStatus("saving");
+      clearTimeout(persistTimer);
+      persistTimer = setTimeout(flushDraft, 320);
     }
     function reRender(){ save(); render(); }
 
@@ -317,8 +405,9 @@
         class: "in" + (o.mono ? " in--mono" : ""),
         value: value == null ? "" : value,
         placeholder: o.placeholder || "",
-        on: { input: function(e){ onChange(e.target.value); } }
+        on: {}
       };
+      props.on[o.event || "input"] = function(e){ onChange(e.target.value); };
       if (o.textarea) props.rows = o.rows || 4;     // textareas: rows, never .type (read-only)
       else props.type = o.type || "text";
       var input = h(o.textarea ? "textarea" : "input", props);
@@ -340,16 +429,51 @@
       ]);
     }
     function uploadField(label, cb){
-      var input = h("input",{type:"file", class:"in", attrs:{accept:"image/*"}, on:{ change:function(e){
-        var f = e.target.files[0]; if(!f) return;
+      var status = h("span",{class:"upload-control__status",text:"PNG, JPG, WebP, GIF, or SVG"});
+      var input = h("input",{type:"file", class:"upload-control__input", attrs:{accept:"image/*"}, on:{ change:function(e){
+        var f = e.target.files && e.target.files[0];
+        if (!f) return;
+        if (!f.type || f.type.indexOf("image/") !== 0) {
+          status.textContent = "Choose a valid image file.";
+          status.classList.add("is-error");
+          e.target.value = "";
+          return;
+        }
+        if (f.size > 12 * 1024 * 1024 && !confirm("This image is larger than 12 MB and will make data.js much heavier. Upload it anyway?")) {
+          e.target.value = "";
+          return;
+        }
+        status.classList.remove("is-error");
+        status.textContent = "Reading " + f.name + "...";
         var r = new FileReader();
+        r.onerror = function(){
+          status.textContent = "The image could not be read. Try the file again.";
+          status.classList.add("is-error");
+          e.target.value = "";
+        };
         r.onload = function(){
-          if (f.size > 800*1024 && !confirm("This image is "+Math.round(f.size/1024)+" KB. Embedding large images bloats data.js. For big files, drop them in assets/media/ and paste the path instead.\n\nEmbed anyway?")) { e.target.value=""; return; }
-          cb(r.result);
+          try {
+            cb(r.result, f);
+            status.textContent = f.name + " uploaded";
+          } catch(err) {
+            console.error(err);
+            status.textContent = "The image could not be added.";
+            status.classList.add("is-error");
+          }
+          e.target.value = "";
         };
         r.readAsDataURL(f);
       }}});
-      return h("label",{class:"f"},[ h("span",{class:"f__label",text:label}), input ]);
+      var button = h("button",{
+        class:"upload-control__button",
+        text:"Choose image",
+        attrs:{type:"button"},
+        on:{click:function(){ input.click(); }}
+      });
+      return h("div",{class:"f"},[
+        h("span",{class:"f__label",text:label}),
+        h("div",{class:"upload-control"},[button,status,input])
+      ]);
     }
     function rowTools(arr, i, after){
       function mk(t, disabled, fn){ return h("button",{class:"mini", text:t, attrs: disabled?{disabled:""}:{}, on:{ click:fn }}); }
@@ -370,23 +494,49 @@
       opts = opts || {};
       var wrap = h("div",{class:"media-ed"});
       function rebuild(){ var n = mediaEditor(m, after, opts); wrap.replaceWith(n); }
+      function identityChanged(){ if (opts.onIdentityChange) opts.onIdentityChange(); }
       var types = ["text","image","video","youtube","embed"];
       wrap.appendChild(selectField("Media type", m.type || "text",
         types.map(function(t){return {value:t,label:t};}),
         function(v){ m.type = v; save(); rebuild(); }));
 
+      if (opts.gallery){
+        wrap.appendChild(field("Media card name", m.name, function(v){
+          m.name = v;
+          save();
+          identityChanged();
+        }, {
+          placeholder: m.label2 || m.label || m.title || m.alt || "Untitled media",
+          hint: "Used to identify this item in the admin list. It does not replace the public caption."
+        }));
+      }
+
       if (!m.type || m.type === "text"){
-        wrap.appendChild(field("Big label", m.label, function(v){ m.label=v; save(); }, {placeholder:"RUF", mono:true}));
+        wrap.appendChild(field("Big label", m.label, function(v){ m.label=v; save(); identityChanged(); }, {placeholder:"RUF", mono:true}));
         wrap.appendChild(field("Sub-label", m.sub, function(v){ m.sub=v; save(); }, {placeholder:"Radiant Undead Framework"}));
       } else if (m.type === "image"){
-        wrap.appendChild(field("Image path or URL", m.src, function(v){ m.src=v; save(); rebuild(); }, {placeholder:"assets/media/shot.png", mono:true}));
-        wrap.appendChild(uploadField("…or upload an image (embeds into the file)", function(d){ m.src=d; save(); rebuild(); }));
-        wrap.appendChild(field("Alt text", m.alt, function(v){ m.alt=v; save(); }));
+        var embedded = typeof m.src === "string" && m.src.indexOf("data:image/") === 0;
+        if (embedded) {
+          wrap.appendChild(h("div",{class:"embedded-media-status"},[
+            h("strong",{text:"Embedded image"}),
+            h("span",{text:Math.round(m.src.length * 0.75 / 1024) + " KB stored in this media card"})
+          ]));
+        }
+        wrap.appendChild(field("Image path or URL", embedded ? "" : m.src, function(v){
+          if (v.trim() || !embedded) { m.src=v.trim(); save(); rebuild(); }
+        }, {
+          placeholder:embedded ? "Paste a path or URL to replace the uploaded image" : "assets/media/shot.png",
+          mono:true,
+          event:"change",
+          hint:embedded ? "Leave this empty to keep the uploaded image." : ""
+        }));
+        wrap.appendChild(uploadField("Upload an image", function(d){ m.src=d; save(); rebuild(); }));
+        wrap.appendChild(field("Alt text", m.alt, function(v){ m.alt=v; save(); identityChanged(); }));
         if (m.src) wrap.appendChild(h("img",{class:"thumbprev", src:m.src, alt:""}));
       } else if (m.type === "video"){
         wrap.appendChild(field("Video path or URL (.mp4)", m.src, function(v){ m.src=v; save(); }, {placeholder:"assets/media/clip.mp4", mono:true}));
         wrap.appendChild(field("Poster image (path/URL)", m.poster, function(v){ m.poster=v; save(); }, {placeholder:"assets/media/poster.png", mono:true}));
-        wrap.appendChild(field("Short label", m.label, function(v){ m.label=v; save(); }));
+        wrap.appendChild(field("Short label", m.label, function(v){ m.label=v; save(); identityChanged(); }));
       } else if (m.type === "youtube"){
         var ytInput;
         var ytOnChange = function(e){
@@ -402,10 +552,10 @@
           ytInput,
           h("span",{class:"f__hint",text:"Paste the full link. The ID is extracted when you leave the field."})
         ]));
-        wrap.appendChild(field("Short label", m.label, function(v){ m.label=v; save(); }));
+        wrap.appendChild(field("Short label", m.label, function(v){ m.label=v; save(); identityChanged(); }));
       } else if (m.type === "embed"){
         wrap.appendChild(field("Embed URL (iframe src)", m.src, function(v){ m.src=v; save(); }, {placeholder:"https://itch.io/embed/123456", mono:true, hint:"itch.io, Sketchfab, Steam widget, etc."}));
-        wrap.appendChild(field("Title / label", m.title || m.label, function(v){ m.title=v; save(); }));
+        wrap.appendChild(field("Title / label", m.title || m.label, function(v){ m.title=v; save(); identityChanged(); }));
       }
 
       if (opts.gallery){
@@ -413,7 +563,7 @@
           if (c) opts.list.forEach(function(x){ if(x!==m) x.featured=false; });
           m.featured = c; after();
         }));
-        wrap.appendChild(field("Caption under main viewer", m.label2, function(v){ m.label2=v; save(); }));
+        wrap.appendChild(field("Caption under main viewer", m.label2, function(v){ m.label2=v; save(); identityChanged(); }));
       }
       return wrap;
     }
@@ -431,9 +581,15 @@
     }
 
     function compactMediaItem(m, index, list){
-      var title = m.label2 || m.label || m.title || m.alt || "Untitled media";
+      function displayTitle(){ return m.name || m.label2 || m.label || m.title || m.alt || "Untitled media"; }
+      var title = displayTitle();
+      var titleEl = h("strong",{class:"media-item__title",text:title});
       var body = h("div",{class:"media-item__body", hidden:true},[
-        mediaEditor(m, reRender, {gallery:true, list:list})
+        mediaEditor(m, reRender, {
+          gallery:true,
+          list:list,
+          onIdentityChange:function(){ titleEl.textContent = displayTitle(); }
+        })
       ]);
       var toggle = h("button",{
         class:"media-item__toggle",
@@ -447,7 +603,7 @@
         mediaItemThumb(m),
         h("span",{class:"media-item__identity"},[
           h("span",{class:"media-item__index",text:"Item " + String(index + 1).padStart(2,"0")}),
-          h("strong",{class:"media-item__title",text:title}),
+          titleEl,
           h("span",{class:"media-item__meta",text:(m.type || "text").toUpperCase()})
         ]),
         m.featured ? h("span",{class:"media-item__featured",text:"Featured"}) : null
@@ -651,6 +807,18 @@
       ]));
 
       var colorChoices = [
+        {value:"#0f100e",label:"Portfolio black"},
+        {value:"#151613",label:"Portfolio dark gray"},
+        {value:"#191a17",label:"Portfolio surface"},
+        {value:"#20211d",label:"Portfolio raised surface"},
+        {value:"#31322c",label:"Portfolio border"},
+        {value:"#24251f",label:"Portfolio soft border"},
+        {value:"#f2f0e9",label:"Portfolio white"},
+        {value:"#aaa99f",label:"Portfolio muted text"},
+        {value:"#74756c",label:"Portfolio caption"},
+        {value:"#ffae3d",label:"Portfolio yellow"},
+        {value:"#ffe875",label:"Portfolio light yellow"},
+        {value:"#a67726",label:"Portfolio deep yellow"},
         {value:"#0d0f12",label:"Graphite black"},
         {value:"#12151a",label:"Deep graphite"},
         {value:"#171b21",label:"Graphite"},
@@ -870,7 +1038,15 @@
       mainEl.appendChild(panel("Preview of generated data.js", h("pre",{class:"export", text: buildDataJs()})));
       mainEl.appendChild(panel("Danger zone", [
         h("button",{class:"danger", style:"padding:8px 13px;border-radius:8px;font-size:12px", text:"Discard draft & reload from committed data.js", on:{ click:function(){
-          if(confirm("Discard ALL unsaved edits and start from the committed data.js?")){ localStorage.removeItem(DRAFT_KEY); state=clone(DEFAULTS); editing=null; reRender(); }
+          if(confirm("Discard ALL unsaved edits and start from the committed data.js?")){
+            localStorage.removeItem(DRAFT_KEY);
+            removeDraftFromDb().catch(function(err){ console.error(err); });
+            state=clone(DEFAULTS);
+            editing=null;
+            render();
+            refreshPreview();
+            setStatus("committed data loaded", true);
+          }
         }}})
       ]));
     }
@@ -938,10 +1114,8 @@
       previewBox = document.getElementById("preview");
 
       document.getElementById("btn-save").addEventListener("click", function(){
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
-        setStatus("saved ✓", true);
-        clearTimeout(savedTimer); savedTimer = setTimeout(function(){ setStatus("draft active"); }, 2000);
-        refreshPreview();
+        setStatus("saving");
+        flushDraft();
       });
       document.getElementById("btn-github").addEventListener("click", saveToGitHub);
       document.getElementById("btn-export").addEventListener("click", function(){ download("data.js", buildDataJs(), "text/javascript"); });
@@ -977,7 +1151,10 @@
       input.focus();
     }
 
-    boot();
+    readDraftFromDb()
+      .then(function(draft){ if (draft && draft.PROFILE) initializeState(draft); })
+      .catch(function(err){ console.warn("Large draft storage is unavailable.", err); })
+      .then(boot);
   })();
   </script>
 </body>

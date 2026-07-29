@@ -4,31 +4,31 @@
    ========================================================================== */
 
 :root {
-  --bg: #0d0f12;
-  --bg-2: #12151a;
-  --surface: #171b21;
-  --surface-2: #1d222a;
-  --line: #2c323b;
-  --line-soft: #222831;
-  --text: #f1f3f5;
-  --muted: #a6acb5;
-  --faint: #757d89;
-  --accent: #d3a465;
-  --accent-soft: #e2bb82;
-  --accent-deep: #80603a;
-  --ink: #111315;
-  --font-sans: "Manrope", Arial, sans-serif;
+  --bg: #0f100e;
+  --bg-2: #151613;
+  --surface: #191a17;
+  --surface-2: #20211d;
+  --line: #31322c;
+  --line-soft: #24251f;
+  --text: #f2f0e9;
+  --muted: #aaa99f;
+  --faint: #74756c;
+  --accent: #ffae3d;
+  --accent-soft: #ffe875;
+  --accent-deep: #a67726;
+  --ink: #11120f;
+  --font-sans: "Space Grotesk", Arial, sans-serif;
   --font-heading: "Manrope", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", Consolas, monospace;
-  --hero-text: #f1f3f5;
-  --heading-text: #f1f3f5;
-  --project-title: #f1f3f5;
-  --body-text: #a6acb5;
+  --hero-text: #ffffff;
+  --heading-text: #f2f0e9;
+  --project-title: #f2f0e9;
+  --body-text: #aaa99f;
   --max: 1280px;
   --radius: 2px;
   --radius-lg: 4px;
   --ease: cubic-bezier(.22, 1, .36, 1);
-  --glow: rgba(211, 164, 101, .08);
+  --glow: rgba(255, 174, 61, .08);
 }
 
 * {
@@ -1120,7 +1120,7 @@ video {
   align-items: center;
   padding: 0 11px;
   color: var(--muted);
-  background: rgba(13,15,18,.86);
+  background: rgba(15,16,14,.86);
   border: 1px solid var(--line);
   font-family: var(--font-mono);
   font-size: 8px;
@@ -1186,7 +1186,7 @@ video {
   display: grid;
   place-items: center;
   color: var(--text);
-  background: rgba(13,15,18,.86);
+  background: rgba(15,16,14,.86);
   border: 1px solid var(--line);
   cursor: pointer;
   transition: color .18s ease, background .18s ease;
@@ -1282,7 +1282,7 @@ video {
   min-width: 24px;
   padding: 3px 5px;
   color: var(--muted);
-  background: rgba(13,15,18,.9);
+  background: rgba(15,16,14,.9);
   border: 1px solid var(--line);
   font-family: var(--font-mono);
   font-size: 7px;

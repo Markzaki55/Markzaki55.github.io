@@ -33,14 +33,38 @@ function isPublishableProject(p) {
    edits show up live in this browser before they are exported and committed.
    ---------------------------------------------------------------------- */
 const DRAFT_KEY = "mzPortfolioDraft";
+const DRAFT_DB_NAME = "mzPortfolioStudio";
+const DRAFT_STORE = "drafts";
 
-function loadDraft() {
+function loadDraftFromDb() {
+  return new Promise((resolve) => {
+    if (!window.indexedDB) { resolve(null); return; }
+    const request = indexedDB.open(DRAFT_DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(DRAFT_STORE)) db.createObjectStore(DRAFT_STORE);
+    };
+    request.onerror = () => resolve(null);
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction(DRAFT_STORE, "readonly");
+      const get = tx.objectStore(DRAFT_STORE).get(DRAFT_KEY);
+      get.onsuccess = () => resolve(get.result || null);
+      get.onerror = () => resolve(null);
+      tx.oncomplete = () => db.close();
+    };
+  });
+}
+
+async function loadDraft() {
+  const largeDraft = await loadDraftFromDb();
+  if (largeDraft) return largeDraft;
   try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); }
   catch (e) { return null; }
 }
 
-function hydrateFromDraft() {
-  const d = loadDraft();
+async function hydrateFromDraft() {
+  const d = await loadDraft();
   if (!d) return;
   const themeDefaults = typeof THEME !== "undefined"
     ? JSON.parse(JSON.stringify(THEME))
@@ -308,7 +332,7 @@ const EXPAND_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 9V4h5v2H6v3H4zm14 0V6h-3V4h5v5h-2zM6 15v3h3v2H4v-5h2zm12 0h2v5h-5v-2h3v-3z"/></svg>';
 
 function isPlayable(m) { return m.type === "video" || m.type === "youtube" || m.type === "embed"; }
-function mediaLabel(m, i) { return m.label2 || m.label || m.alt || (i != null ? `Media ${i + 1}` : ""); }
+function mediaLabel(m, i) { return m.label2 || m.name || m.label || m.alt || (i != null ? `Media ${i + 1}` : ""); }
 
 /* featured item first, otherwise original order */
 function orderMedia(items) {
@@ -810,8 +834,8 @@ function renderFooter() {
 /* ======================================================================
    BOOT
    ====================================================================== */
-document.addEventListener("DOMContentLoaded", () => {
-  hydrateFromDraft();
+document.addEventListener("DOMContentLoaded", async () => {
+  await hydrateFromDraft();
   applyTheme();
   if (document.body.dataset.page === "home") renderHome();
   if (document.body.dataset.page === "project") renderProject();

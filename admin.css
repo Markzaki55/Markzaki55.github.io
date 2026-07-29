@@ -4,21 +4,21 @@
    ========================================================================== */
 
 :root {
-  --bg: #0d0f12;
-  --panel: #171b21;
-  --panel2: #111419;
-  --line: #2c323b;
-  --line-soft: #222831;
-  --text: #f1f3f5;
-  --muted: #a6acb5;
-  --faint: #757d89;
-  --accent: #d3a465;
-  --accent-deep: #80603a;
+  --bg: #0f100e;
+  --panel: #191a17;
+  --panel2: #151613;
+  --line: #31322c;
+  --line-soft: #24251f;
+  --text: #f2f0e9;
+  --muted: #aaa99f;
+  --faint: #74756c;
+  --accent: #ffae3d;
+  --accent-deep: #a67726;
   --ok: #9acb76;
   --warn: #ff7868;
   --radius: 2px;
   --mono: "IBM Plex Mono", Consolas, monospace;
-  --sans: "Manrope", Arial, sans-serif;
+  --sans: "Space Grotesk", Arial, sans-serif;
 }
 
 html {
@@ -65,10 +65,8 @@ select:focus-visible {
   align-items: center;
   gap: 14px;
   padding: 10px 16px;
-  background: rgba(13, 15, 18, .95);
+  background: rgba(15, 16, 14, .95);
   border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
 }
 
 .top__brand {
@@ -157,9 +155,8 @@ select:focus-visible {
 
 .top button.primary:hover {
   color: #10110f;
-  background: #e2bb82;
-  border-color: #e2bb82;
-  filter: none;
+  background: #ffe875;
+  border-color: #ffe875;
 }
 
 /* Three-pane workspace ---------------------------------------------------- */
@@ -391,7 +388,7 @@ h2.tab-title {
 
 .in:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(211,164,101,.09);
+  box-shadow: 0 0 0 3px rgba(255,174,61,.09);
   outline: 0;
 }
 
@@ -407,6 +404,87 @@ textarea.in {
 .in--mono {
   font-family: var(--mono);
   font-size: 10px;
+}
+
+.upload-control {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+.upload-control:focus-within {
+  border-color: var(--accent);
+}
+
+.upload-control__button {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 6px 10px;
+  color: #11120f;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.upload-control__button:hover {
+  background: #ffe875;
+  border-color: #ffe875;
+}
+
+.upload-control__status {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-control__status.is-error {
+  color: var(--warn);
+}
+
+.upload-control__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.embedded-media-status {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 9px 10px;
+  color: var(--muted);
+  background: var(--bg);
+  border-left: 2px solid var(--accent-deep);
+  font-family: var(--mono);
+  font-size: 9px;
+}
+
+.embedded-media-status strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.embedded-media-status span {
+  color: var(--faint);
+  text-align: right;
 }
 
 .row {
@@ -1092,5 +1170,24 @@ pre.export {
 
   .media-item__bar > .tools {
     margin-left: auto;
+  }
+
+  .upload-control {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .upload-control__status {
+    padding: 2px 3px;
+    white-space: normal;
+  }
+
+  .embedded-media-status {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .embedded-media-status span {
+    text-align: left;
   }
 }

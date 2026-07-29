@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
-  <rect width="1200" height="630" fill="#0d0f12"/>
+  <rect width="1200" height="630" fill="#0f100e"/>
 
   <g transform="translate(72 66) scale(1.25)">
     <path d="M4 44V12h7l11 14 11-14h7v32h-8V25L22 38 12 25v19H4Z"
-          fill="#f1f3f5"/>
+          fill="#f2f0e9"/>
     <path d="M44 12h30v7L56 37h18v7H43v-7l18-18H44v-7Z"
-          fill="#f1f3f5"/>
+          fill="#f2f0e9"/>
   </g>
 
   <text x="72" y="286"
@@ -13,20 +13,20 @@
         font-size="116"
         font-weight="700"
         letter-spacing="-7"
-        fill="#f1f3f5">Mark Zaki</text>
+        fill="#f2f0e9">Mark Zaki</text>
 
   <text x="78" y="352"
         font-family="Arial, Helvetica, sans-serif"
         font-size="28"
         font-weight="400"
         letter-spacing="-1"
-        fill="#a6acb5">Gameplay &amp; Multiplayer Systems Engineer</text>
+        fill="#aaa99f">Gameplay &amp; Multiplayer Systems Engineer</text>
 
-  <path d="M72 500H1128" stroke="#2c323b"/>
+  <path d="M72 500H1128" stroke="#31322c"/>
   <text x="72" y="548"
         font-family="Consolas, monospace"
         font-size="15"
         letter-spacing="2"
-        fill="#757d89">UNITY / MULTIPLAYER / VR / SYSTEMS</text>
-  <rect x="1098" y="532" width="30" height="4" fill="#d3a465"/>
+        fill="#74756c">UNITY / MULTIPLAYER / VR / SYSTEMS</text>
+  <rect x="1098" y="532" width="30" height="4" fill="#ffae3d"/>
 </svg>
