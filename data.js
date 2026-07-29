@@ -12,7 +12,7 @@ const PROFILE = {
     "Combat Design",
     "AI Systems"
   ],
-  "tagline": "Gameplay & Multiplayer Systems Engineer",
+  "tagline": "Gameplay & Multiplayer Systems Engineer ",
   "about": "I enjoy solving tricky game systems and working with people who care about the details. If you are building something interesting and think I could help, feel free to get in touch.",
   "intro": "I make Unity games with a focus on how they feel and how they hold together, from multiplayer and combat to VR interactions and the tools behind them.",
   "stats": [
