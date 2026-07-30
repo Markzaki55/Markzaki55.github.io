@@ -1,6 +1,6 @@
 /* ==========================================================================
    MARK ZAKI PORTFOLIO STUDIO
-   Interface overrides for the browser-based content editor.
+   Complete interface styles for the browser-based content editor.
    ========================================================================== */
 
 :root {
@@ -21,6 +21,12 @@
   --mono: var(--sans);
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 html {
   background: var(--bg);
 }
@@ -32,6 +38,11 @@ body {
   font-family: var(--sans);
   font-size: 13px;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
 }
 
 button,
@@ -39,6 +50,10 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+button {
+  cursor: pointer;
 }
 
 button:focus-visible,
@@ -500,12 +515,6 @@ textarea.in {
   margin-bottom: 0;
 }
 
-.grid2 {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 14px;
-}
-
 .check {
   display: inline-flex;
   align-items: center;
@@ -648,7 +657,6 @@ textarea.in {
   color: var(--accent);
 }
 
-.chiprow,
 .typebtns {
   display: flex;
   flex-wrap: wrap;
@@ -1111,13 +1119,11 @@ pre.export {
   .addbtn,
   .pitem__meta,
   .typebtns button,
-  .media-item__preview,
   .media-item__index,
   .media-item__meta,
   .media-item__featured,
   .visual-preset__font,
   .font-control__head,
-  .theme-note,
   .color-choice__label,
   .export,
   .lock__box button,
@@ -1221,10 +1227,6 @@ pre.export {
 
   .panel {
     padding: 20px 15px;
-  }
-
-  .grid2 {
-    grid-template-columns: 1fr;
   }
 
   .visual-presets {

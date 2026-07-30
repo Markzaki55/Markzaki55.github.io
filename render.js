@@ -138,21 +138,13 @@ async function hydrateFromDraft() {
 
 /* Map THEME keys -> CSS custom properties, and apply them to :root. */
 const THEME_VARS = {
-  bg: "--bg", bg2: "--bg-2", surface: "--surface", surface2: "--surface-2",
-  line: "--line", lineSoft: "--line-soft", text: "--text", muted: "--muted",
+  bg: "--bg", surface: "--surface", surface2: "--surface-2",
+  line: "--line", text: "--text", muted: "--muted",
   faint: "--faint", accent: "--accent", accentSoft: "--accent-soft", accentDeep: "--accent-deep",
   fontSans: "--font-sans", fontHeading: "--font-heading",
   heroText: "--hero-text", headingText: "--heading-text",
   projectTitle: "--project-title", bodyText: "--body-text",
 };
-
-function hexToRgba(hex, a) {
-  const h = String(hex).replace("#", "");
-  const f = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
-  const n = parseInt(f, 16);
-  if (isNaN(n) || f.length !== 6) return `rgba(211,164,101,${a})`;
-  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
-}
 
 function applyTheme() {
   if (typeof THEME === "undefined" || !THEME) return;
@@ -160,7 +152,6 @@ function applyTheme() {
   Object.entries(THEME_VARS).forEach(([k, varName]) => {
     if (THEME[k]) root.setProperty(varName, THEME[k]);
   });
-  if (THEME.accent) root.setProperty("--glow", hexToRgba(THEME.accent, 0.1));
   if (THEME.bg) {
     let meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) {

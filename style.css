@@ -4,31 +4,28 @@
    ========================================================================== */
 
 :root {
-  --bg: #0b0b0c;
-  --bg-2: #0b0b0c;
-  --surface: #171719;
-  --surface-2: #1e1e21;
-  --line: #333338;
-  --line-soft: #252528;
-  --text: #f2f0e9;
-  --muted: #aaa99f;
-  --faint: #74756c;
-  --accent: #ffae3d;
-  --accent-soft: #ffe875;
-  --accent-deep: #a67726;
+  /* Keep these first-paint values aligned with the published THEME in data.js. */
+  --bg: #101010;
+  --surface: #1b1b1b;
+  --surface-2: #232323;
+  --line: #383838;
+  --text: #f2f2f2;
+  --muted: #ababab;
+  --faint: #7c7c7c;
+  --accent: #d0d0d0;
+  --accent-soft: #ececec;
+  --accent-deep: #777777;
   --ink: #111111;
-  --font-sans: "Space Grotesk", Arial, sans-serif;
-  --font-heading: "Manrope", Arial, sans-serif;
+  --font-sans: "DM Sans", Arial, sans-serif;
+  --font-heading: "DM Sans", Arial, sans-serif;
   --font-mono: var(--font-sans);
   --hero-text: #ffffff;
-  --heading-text: #f2f0e9;
-  --project-title: #f2f0e9;
-  --body-text: #aaa99f;
+  --heading-text: #f2f2f2;
+  --project-title: #f2f2f2;
+  --body-text: #ababab;
   --max: 1280px;
   --radius: 2px;
-  --radius-lg: 4px;
   --ease: cubic-bezier(.22, 1, .36, 1);
-  --glow: rgba(255, 174, 61, .08);
 }
 
 * {
@@ -88,12 +85,6 @@ video {
   width: min(100%, var(--max));
   margin: 0 auto;
   padding-inline: 40px;
-}
-
-.mono {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: .045em;
 }
 
 .number-label {
@@ -333,7 +324,6 @@ video {
   border: 0;
 }
 
-.pcard__tags,
 .pcard__meta {
   display: flex;
   flex-wrap: nowrap;
@@ -354,7 +344,6 @@ video {
   text-overflow: ellipsis;
 }
 
-.pcard__tags span:not(:last-child)::after,
 .pcard__meta span:not(:last-child)::after {
   content: "/";
   margin-left: 11px;
@@ -487,10 +476,6 @@ video {
   text-align: left;
 }
 
-.pillar:hover {
-  background: transparent;
-}
-
 .pillar__num {
   color: var(--accent);
 }
@@ -561,18 +546,9 @@ video {
 
 .stacklist span:hover {
   color: var(--text);
-  background: transparent;
 }
 
 /* Contact ----------------------------------------------------------------- */
-
-.contact {
-  color: var(--text);
-}
-
-.contact .section__index {
-  color: var(--accent);
-}
 
 .contact__simple {
   display: flex;
