@@ -1,0 +1,5 @@
+# Admin editor is local-only — never deploy it.
+# Remove the files from GitHub tracking with:
+#   git rm --cached admin.html admin.css
+admin.html
+admin.css

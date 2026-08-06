@@ -14,6 +14,8 @@ Then open `http://localhost:8000`.
 
 ## Content editor
 
+The portfolio studio (`admin.html` / `admin.css`) is **local-only**: it is
+excluded from git (see `.gitignore`) so it is never deployed to GitHub Pages.
 Open `http://localhost:8000/admin.html` to edit:
 
 - Profile, hero copy, engineering focus, core tools, and contact copy
@@ -49,7 +51,6 @@ the media files and `data.js` automatically.
 - `projects.html`: complete public project list
 - `project.html`: dynamic project case study
 - `privacy-policy.html`: privacy information
-- `admin.html` / `admin.css`: portfolio studio
 - `data.js`: editable profile, theme, and project data
 - `render.js`: shared rendering and interactions
 - `style.css`: public design system
