@@ -37,7 +37,7 @@
         <button id="btn-github">Publish to GitHub</button>
         <button id="btn-preview-toggle">Hide preview</button>
         <button id="btn-open">Open site ↗</button>
-        <button class="primary" id="btn-export">Export data.js</button>
+        <button class="primary" id="btn-export">Export ZIP</button>
       </div>
     </div>
 
@@ -284,42 +284,63 @@
         alert("Configure GitHub token, owner, and repo in Settings first.");
         current = "settings"; editing = null; render(); return;
       }
-      var content = buildDataJs();
-      var b64 = utf8ToBase64(content);
-      var path = gh.path || "data.js";
       var branch = gh.branch || "main";
-      var apiUrl = "https://api.github.com/repos/" + encodeURIComponent(gh.owner) + "/" + encodeURIComponent(gh.repo) + "/contents/" + path;
+      var dataPath = gh.path || "data.js";
+      var ex = collectExport();
+      var b64Data = utf8ToBase64(ex.text);
+      var message = "Update portfolio from admin panel";
+      var savedKey = "mzSavedMediaPaths";
+      var prevPaths = [];
+      try { prevPaths = JSON.parse(localStorage.getItem(savedKey) || "[]"); } catch(_){}
+      var currentPaths = ex.media.map(function(m){ return m.path; });
+      var stale = prevPaths.filter(function(p){ return currentPaths.indexOf(p) === -1; });
+      var apiBase = "https://api.github.com/repos/" + encodeURIComponent(gh.owner) + "/" + encodeURIComponent(gh.repo) + "/contents/";
+      var getHeaders = {
+        "Authorization": "token " + gh.token,
+        "Accept": "application/vnd.github.v3+json"
+      };
+      var putHeaders = {
+        "Authorization": "token " + gh.token,
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+      };
 
-      setStatus("saving to GitHub...");
-      fetch(apiUrl + "?ref=" + encodeURIComponent(branch), {
-        headers: { "Authorization": "token " + gh.token, "Accept": "application/vnd.github.v3+json" }
-      })
-      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); })
-      .then(function(res){
-        if (!res.ok && res.status !== 404) {
-          throw new Error(res.data.message || "GitHub error " + res.status);
-        }
-        var sha = res.status === 404 ? null : res.data.sha;
-        var body = { message: "Update data.js from admin panel", content: b64, branch: branch };
-        if (sha) body.sha = sha;
-        return fetch(apiUrl, {
-          method: "PUT",
-          headers: {
-            "Authorization": "token " + gh.token,
-            "Accept": "application/vnd.github.v3+json",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(body)
-        });
-      })
-      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); })
-      .then(function(res){
-        if (!res.ok) throw new Error(res.data.message || "GitHub PUT error " + res.status);
+      function putFile(relPath, b64content, isDelete){
+        var apiUrl = apiBase + relPath;
+        return fetch(apiUrl + "?ref=" + encodeURIComponent(branch), { headers: getHeaders })
+          .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); })
+          .then(function(res){
+            if (!res.ok && res.status !== 404) throw new Error(res.data.message || "GitHub error " + res.status);
+            if (isDelete && res.status === 404) return;
+            var body = { message: message, branch: branch };
+            if (isDelete) body.sha = res.data.sha;
+            else {
+              body.content = b64content;
+              if (res.status !== 404) body.sha = res.data.sha;
+            }
+            return fetch(apiUrl, { method: isDelete ? "DELETE" : "PUT", headers: putHeaders, body: JSON.stringify(body) })
+              .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); });
+          })
+          .then(function(res){
+            if (res && !res.ok) throw new Error(res.data.message || "GitHub error " + res.status);
+          });
+      }
+
+      setStatus("uploading " + ex.media.length + " image file(s)...");
+      var chain = Promise.resolve();
+      ex.media.forEach(function(m){
+        chain = chain.then(function(){ return putFile(m.path, b64FromDataUrl(m.b64), false); });
+      });
+      stale.forEach(function(p){
+        chain = chain.then(function(){ return putFile(p, "", true).catch(function(){}); });
+      });
+      chain = chain.then(function(){ return putFile(dataPath, b64Data, false); });
+      chain.then(function(){
+        try { localStorage.setItem(savedKey, JSON.stringify(currentPaths)); } catch(_){}
         setStatus("saved to GitHub ✓", true);
         clearTimeout(savedTimer); savedTimer = setTimeout(function(){ setStatus("draft active"); }, 3000);
-        alert("data.js committed to GitHub. It may take 1 to 2 minutes for GitHub Pages to update.");
-      })
-      .catch(function(err){
+        alert("Committed data.js and " + ex.media.length + " image file(s) to GitHub. It may take 1 to 2 minutes for GitHub Pages to update.");
+      }).catch(function(err){
         setStatus("GitHub save failed", false);
         console.error(err);
         alert("Failed to save to GitHub: " + err.message);
@@ -1022,32 +1043,176 @@
     }
 
     /* ---------- PUBLISH ---------- */
-    function buildDataJs(){
-      return "/* =========================================================================\n" +
-             "   PORTFOLIO DATA - Mark Zaki\n" +
-             "   Generated by admin.html. You can still hand-edit this file by hand.\n" +
-             "   ========================================================================= */\n\n" +
-             "const PROFILE = " + JSON.stringify(state.PROFILE, null, 2) + ";\n\n" +
-             "const THEME = " + JSON.stringify(state.THEME, null, 2) + ";\n\n" +
-             "const PROJECTS = " + JSON.stringify(state.PROJECTS, null, 2) + ";\n";
+    var MEDIA_PREFIX = "assets/media/";
+    function extFromDataUrl(dataUrl){
+      var mime = (dataUrl.slice(0, dataUrl.indexOf(";")) || "").split("/")[1] || "";
+      return mime.split("+")[0] || "png";
     }
-    function download(name, text, mime){
-      var blob = new Blob([text], {type: mime || "text/plain"});
+    function b64FromDataUrl(dataUrl){
+      var i = dataUrl.indexOf(",");
+      return i > -1 ? dataUrl.slice(i + 1) : "";
+    }
+    function collectEmbeddedMedia(projects){
+      var out = [];
+      projects.forEach(function(p){
+        var id = slug(p.id || p.title);
+        function take(kind, index, src, suffix){
+          if (typeof src !== "string" || src.indexOf("data:image/") !== 0) return null;
+          var path = MEDIA_PREFIX + id + "-" + kind + (kind === "cover" ? "" : "-" + index) + (suffix || "") + "." + extFromDataUrl(src);
+          out.push({ path: path, b64: src });
+          return path;
+        }
+        if (p.cover) { var r = take("cover", 0, p.cover.src); if (r) p.cover.src = r; }
+        (p.media || []).forEach(function(m, i){
+          if (!m) return;
+          var srcOrig = m.src;
+          var r = take("media", i, srcOrig); if (r) m.src = r;
+          if (m.poster && m.poster !== srcOrig) { r = take("media", i, m.poster, "-poster"); if (r) m.poster = r; }
+        });
+        (p.gallery || []).forEach(function(g, i){
+          if (!g) return;
+          var srcOrig = g.src;
+          var r = take("gallery", i, srcOrig); if (r) g.src = r;
+          if (g.poster && g.poster !== srcOrig) { r = take("gallery", i, g.poster, "-poster"); if (r) g.poster = r; }
+        });
+      });
+      var seen = {}, unique = [];
+      out.forEach(function(x){ if (!seen[x.path]) { seen[x.path] = true; unique.push(x); } });
+      return unique;
+    }
+    function collectExport(){
+      var projects = clone(state.PROJECTS);
+      var media = collectEmbeddedMedia(projects);
+      return {
+        text: "/* =========================================================================\n" +
+              "   PORTFOLIO DATA - Mark Zaki\n" +
+              "   Generated by admin.html. You can still hand-edit this file by hand.\n" +
+              "   ========================================================================= */\n\n" +
+              "const PROFILE = " + JSON.stringify(state.PROFILE, null, 2) + ";\n\n" +
+              "const THEME = " + JSON.stringify(state.THEME, null, 2) + ";\n\n" +
+              "const PROJECTS = " + JSON.stringify(projects, null, 2) + ";\n",
+        media: media
+      };
+    }
+    function buildDataJs(){ return collectExport().text; }
+    function download(name, content, mime){
+      var blob = content instanceof Blob ? content : new Blob([content], {type: mime || "text/plain"});
       var url = URL.createObjectURL(blob);
       var a = h("a", {href: url, download: name});
       document.body.appendChild(a); a.click();
       setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 200);
     }
+    function b64ToBytes(b64){
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
+    function crc32(buf){
+      var table = crc32.table || (crc32.table = (function(){
+        var t = [], c, n, k;
+        for (n = 0; n < 256; n++){ c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+        return t;
+      })());
+      var crc = 0xFFFFFFFF, i;
+      for (i = 0; i < buf.length; i++) crc = table[(crc ^ buf[i]) & 0xFF] ^ (crc >>> 8);
+      return (crc ^ 0xFFFFFFFF) >>> 0;
+    }
+    function concatBytes(parts, total){
+      var out = new Uint8Array(total), o = 0;
+      parts.forEach(function(p){ out.set(p, o); o += p.length; });
+      return out;
+    }
+    function buildZip(files){
+      /* Store-only ZIP writer (no compression). files: [{name, data:Uint8Array}] */
+      var enc = new TextEncoder();
+      var chunks = [], central = [], offset = 0;
+      var d = new Date();
+      var dosTime = ((d.getHours() << 11) | (d.getMinutes() << 5) | (Math.floor(d.getSeconds() / 2))) & 0xFFFF;
+      var dosDate = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+      files.forEach(function(f){
+        var nameBytes = enc.encode(f.name);
+        var crc = crc32(f.data), size = f.data.length;
+        var hdr = new Uint8Array(30 + nameBytes.length);
+        var v = new DataView(hdr.buffer);
+        v.setUint32(0, 0x04034b50, true);
+        v.setUint16(4, 20, true);
+        v.setUint16(6, 0x0800, true);
+        v.setUint16(8, 0, true);
+        v.setUint16(10, dosTime, true);
+        v.setUint16(12, dosDate, true);
+        v.setUint32(14, crc, true);
+        v.setUint32(18, size, true);
+        v.setUint32(22, size, true);
+        v.setUint16(26, nameBytes.length, true);
+        v.setUint16(28, 0, true);
+        hdr.set(nameBytes, 30);
+        chunks.push(hdr, f.data);
+        central.push({ nameBytes: nameBytes, crc: crc, size: size, offset: offset });
+        offset += hdr.length + size;
+      });
+      var cdStart = offset, cdSize = 0, cdParts = [];
+      central.forEach(function(c){
+        var cd = new Uint8Array(46 + c.nameBytes.length);
+        var v = new DataView(cd.buffer);
+        v.setUint32(0, 0x02014b50, true);
+        v.setUint16(4, 20, true);
+        v.setUint16(6, 20, true);
+        v.setUint16(8, 0x0800, true);
+        v.setUint16(10, 0, true);
+        v.setUint16(12, dosTime, true);
+        v.setUint16(14, dosDate, true);
+        v.setUint32(16, c.crc, true);
+        v.setUint32(20, c.size, true);
+        v.setUint32(24, c.size, true);
+        v.setUint16(28, c.nameBytes.length, true);
+        v.setUint16(30, 0, true);
+        v.setUint16(32, 0, true);
+        v.setUint16(34, 0, true);
+        v.setUint16(36, 0, true);
+        v.setUint32(38, c.offset, true);
+        v.setUint32(42, 0, true);
+        cd.set(c.nameBytes, 46);
+        cdParts.push(cd);
+        cdSize += cd.length;
+      });
+      var eocd = new Uint8Array(22);
+      var v = new DataView(eocd.buffer);
+      v.setUint32(0, 0x06054b50, true);
+      v.setUint16(4, 0, true);
+      v.setUint16(6, 0, true);
+      v.setUint16(8, central.length, true);
+      v.setUint16(10, central.length, true);
+      v.setUint32(12, cdSize, true);
+      v.setUint32(16, cdStart, true);
+      v.setUint16(20, 0, true);
+      return new Blob([concatBytes(chunks.concat(cdParts).concat([eocd]), cdStart + cdSize + eocd.length)], { type: "application/zip" });
+    }
+    function zipExport(){
+      var ex = collectExport();
+      var files = ex.media.map(function(m){ return { name: m.path, data: b64ToBytes(b64FromDataUrl(m.b64)) }; });
+      files.push({ name: "data.js", data: new TextEncoder().encode(ex.text) });
+      return buildZip(files);
+    }
     function renderPublish(){
-      head("Publish", "Your edits live in this browser as a draft. To make them public, export data.js and commit it.");
+      var ex = collectExport();
+      var embeddedSize = ex.media.reduce(function(sum, m){ return sum + b64FromDataUrl(m.b64).length; }, 0) * 0.75;
+      head("Publish", "Your edits live in this browser as a draft. To make them public, export the site and commit it.");
       mainEl.appendChild(h("div",{class:"note", html:
         "<b>How publishing works.</b> The editor saves a working <em>draft</em> in this browser, and the preview reads it instantly. " +
-        "The public site only changes when you replace <b>data.js</b> in your repository:<br><br>" +
-        "1. Click <b>Export data.js</b> below (or in the top bar).<br>" +
-        "2. In your GitHub repo, open <b>data.js</b> → Edit → paste the new contents (or drag the downloaded file in).<br>" +
-        "3. Commit. GitHub Pages rebuilds and everyone sees the update."}));
+        "Images are no longer embedded in <b>data.js</b> — they are exported as files into <b>assets/media/</b>:<br><br>" +
+        "1. Click <b>Export ZIP</b> below (or in the top bar) to download <b>data.js</b> plus all media files in one archive.<br>" +
+        "2. Unzip it into your repository root (over your local copy, or drag the files into GitHub).<br>" +
+        "3. Commit. GitHub Pages rebuilds and everyone sees the update.<br><br>" +
+        "With a GitHub token configured in Settings, <b>Publish to GitHub</b> uploads the media files and <b>data.js</b> for you automatically."}));
+      if (ex.media.length){
+        mainEl.appendChild(h("div",{class:"note", html:
+          "This draft has <b>" + ex.media.length + " embedded image(s)</b> (≈" + (embeddedSize / 1048576).toFixed(1) + " MB). " +
+          "They will be written as files under <b>assets/media/</b> and referenced by path, keeping <b>data.js</b> small."}));
+      }
       mainEl.appendChild(panel("Export", [
-        h("button",{class:"add", text:"⬇ Export data.js (for the site)", on:{ click:function(){ download("data.js", buildDataJs(), "text/javascript"); } }}),
+        h("button",{class:"add", text:"⬇ Export ZIP (site + media)", on:{ click:function(){ download("portfolio-publish.zip", zipExport(), "application/zip"); } }}),
+        h("button",{class:"add", style:"margin-left:8px", text:"⬇ Export data.js only", on:{ click:function(){ download("data.js", buildDataJs(), "text/javascript"); } }}),
         h("button",{class:"add", style:"margin-left:8px", text:"⬇ Export JSON backup", on:{ click:function(){ download("portfolio-backup.json", JSON.stringify(state,null,2), "application/json"); } }}),
         h("label",{class:"add", style:"margin-left:8px;display:inline-block"}, [
           "⬆ Import JSON backup",
@@ -1142,7 +1307,7 @@
         flushDraft();
       });
       document.getElementById("btn-github").addEventListener("click", saveToGitHub);
-      document.getElementById("btn-export").addEventListener("click", function(){ download("data.js", buildDataJs(), "text/javascript"); });
+      document.getElementById("btn-export").addEventListener("click", function(){ download("portfolio-publish.zip", zipExport(), "application/zip"); });
       document.getElementById("btn-open").addEventListener("click", function(){ window.open(previewPage.value || "index.html", "_blank"); });
       document.getElementById("preview-refresh").addEventListener("click", refreshPreview);
       previewPage.addEventListener("change", refreshPreview);
