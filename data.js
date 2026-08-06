@@ -480,11 +480,11 @@ const PROJECTS = [
       "type": "image",
       "label": "FARAQUE",
       "sub": "Multiplayer Racing Platformer",
-      "src": "assets\\media\\faraque-cover.png"
+      "src": "assets/media/faraque-cover.png"
     },
     "role": "Gameplay & Multiplayer Programmer",
     "timeline": "",
-    "techStack": "Unity, C#, Photon Fusion",
+    "techStack": "Unity, C#, Photon Fusion, Firebase",
     "media": [
       {
         "type": "youtube",
@@ -542,6 +542,15 @@ const PROJECTS = [
           "Implemented character selection and customization",
           "Integrated in-app purchases",
           "Connected progression and customization to the wider race experience"
+        ]
+      },
+      {
+        "heading": "Accounts & Cloud Save",
+        "body": "Added Firebase Authentication and Cloud Firestore so players can sign in and keep their progress across devices and re-installs.",
+        "list": [
+          "Integrated Firebase Authentication (email and Google sign-in) with a secure account flow",
+          "Saved characters, customization, economy (currency and in-app purchases), and race progress to Firestore",
+          "Restored the full player profile on login with local caching for offline play"
         ]
       }
     ],
