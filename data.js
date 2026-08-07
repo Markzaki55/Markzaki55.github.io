@@ -12,7 +12,7 @@ const PROFILE = {
     "AI Systems"
   ],
   "tagline": "Gameplay & Multiplayer Systems Programmer",
-  "about": "I like people who care about the details as much as I do. If you're building something fun and think I could help, don't be shy — I always make time for a good conversation.",
+  "about": "I like people who care about the details as much as I do. If you're building something fun and think I could help, reach out — I always make time for a good conversation.",
   "intro": "I build Unity systems designed to grow — data-driven configs, modular architecture, scalable multiplayer, UI frameworks that make adding features feel easy instead of scary, and the backend integration that ties it all into a live game. I'd rather build it right once than patch it forever.",
   "stats": [
     {
