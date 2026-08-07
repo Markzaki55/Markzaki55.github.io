@@ -464,6 +464,90 @@ const PROJECTS = [
     "links": []
   },
   {
+    "id": "repel-all-ets",
+    "title": "Repel All ETs",
+    "subtitle": "Passion Project · First-Person Shooter",
+    "tagline": "A pre-alpha FPS passion project with horde combat, a shotgun-driven weapon feel, and data-driven systems built with a 7-person team.",
+    "tags": [
+      "Unity",
+      "FPS",
+      "AI",
+      "Weapon Systems",
+      "Architecture"
+    ],
+    "featured": true,
+    "cover": {
+      "type": "text",
+      "label": "RAE",
+      "sub": "First-Person Shooter"
+    },
+    "role": "Programming Lead & Technical Designer",
+    "timeline": "Pre-Alpha",
+    "techStack": "Unity, C#, ScriptableObjects, layered state machines, object pooling",
+    "media": [
+      {
+        "type": "text",
+        "label": "GAMEPLAY",
+        "sub": "Shotgun combat against hordes of enemies",
+        "label2": "Gameplay Overview",
+        "featured": true
+      },
+      {
+        "type": "text",
+        "label": "LAYERED BRAIN",
+        "sub": "Layered state machines working together",
+        "label2": "Layered Brain"
+      },
+      {
+        "type": "text",
+        "label": "WEAPONS",
+        "sub": "Data-driven weapon and bullet system",
+        "label2": "Weapon System"
+      },
+      {
+        "type": "text",
+        "label": "ENEMY AI",
+        "sub": "Priority-based data-driven decisions",
+        "label2": "Enemy AI"
+      },
+      {
+        "type": "text",
+        "label": "OBJECT POOL",
+        "sub": "Generic pooling for bullets, enemies, VFX, and SFX",
+        "label2": "Object Pooling"
+      }
+    ],
+    "sections": [
+      {
+        "heading": "Overview",
+        "body": "Repel All ETs is a pre-alpha first-person shooter passion project built around horde combat and a shotgun-driven weapon feel. I work as Programming Lead and Technical Designer within a 7-person team of designers, programmers, and artists, establishing the core gameplay foundation."
+      },
+      {
+        "heading": "Programming Lead",
+        "list": [
+          "Built the layered brain: a set of state machines working together to drive character behavior",
+          "Implemented data-driven character configurations and states",
+          "Built a fully data-driven weapon and bullet system",
+          "Created a generic object pool used across bullets, enemies, VFX, and sound effects"
+        ]
+      },
+      {
+        "heading": "Enemy AI",
+        "list": [
+          "Designed enemies around a priority-based decision-making system",
+          "Fully data-driven and extendable for new agent types",
+          "Faction-agnostic agent targeting and grouping, so new factions can be added without reworking existing agents"
+        ]
+      },
+      {
+        "heading": "Technical Designer",
+        "body": "Worked as Technical Designer to bridge the gap between game designers and implementation, turning design intent into concrete, data-driven systems that designers can configure without touching code."
+      }
+    ],
+    "gallery": [],
+    "links": []
+  },
+  {
     "id": "faraque",
     "title": "Faraque",
     "subtitle": "2D Multiplayer Racing Platformer",
