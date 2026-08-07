@@ -311,7 +311,7 @@ const PROJECTS = [
       {
         "type": "text",
         "label": "",
-        "sub": "Combat reel with attacks, parries, and feedback",
+        "sub": "",
         "label2": "",
         "featured": true
       }
