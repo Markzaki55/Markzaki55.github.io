@@ -283,8 +283,7 @@ video {
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: var(--surface);
-  border: 1px solid var(--line);
-  transition: border-color .22s ease, background .22s ease;
+  transition: background .22s ease;
 }
 
 .pcard__media img,
@@ -306,7 +305,6 @@ video {
 .pcard:hover .pcard__media,
 .pcard:focus-visible .pcard__media {
   background: var(--surface-2);
-  border-color: var(--faint);
 }
 
 .pcard__media .ph {
@@ -877,7 +875,6 @@ video {
 .dsection__media {
   margin-top: 14px;
   overflow: hidden;
-  border: 1px solid var(--line);
 }
 
 .dsection__media img,
@@ -1005,7 +1002,6 @@ video {
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: var(--surface);
-  border: 1px solid var(--line);
 }
 
 .mediabox__frame {
