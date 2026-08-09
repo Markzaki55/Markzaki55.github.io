@@ -59,7 +59,7 @@ const PROFILE = {
     "github": "https://github.com/Markzaki55",
     "resume": "assets/MARK_ZAKI_Resume.pdf",
     "linkedin": "https://www.linkedin.com/in/markzakimalak",
-    "email": "mailto:markzakimalakzaki@gmail.com "
+    "email": "mailto:markzakimalakzaki@gmail.com"
   },
   "stack": [
     "Unity",
