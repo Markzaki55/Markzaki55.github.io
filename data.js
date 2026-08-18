@@ -61,9 +61,6 @@ const PROFILE = {
     "linkedin": "https://www.linkedin.com/in/markzakimalak",
     "email": "mailto:markzakimalakzaki@gmail.com"
   },
-  "contactForm": {
-    "accessKey": "aaf80370-3ba7-458b-8931-5a05beeeeef8"
-  },
   "stack": [
     "Unity",
     "C#",

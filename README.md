@@ -22,7 +22,7 @@ Open `http://localhost:8000/admin.html` to edit:
 - Social, email, resume, and project links
 - Shared site colors
 - Projects, media galleries, write-ups, tags, and featured status
-- Drafts, JSON backups, ZIP exports, and GitHub publishing
+- Drafts and data.js export
 
 Images uploaded in the editor are stored as files under `assets/media/` and
 referenced by path in `data.js` (never embedded as base64), so `data.js`
@@ -36,14 +36,10 @@ but are omitted from the public project list until they contain publishable cont
 
 To publish:
 
-1. In the admin **Publish** tab, click **Export ZIP (site + media)** — it
-   downloads `data.js` plus every media file in one archive.
-2. Unzip it into the repository root (over your local copy, or drag the files
-   into GitHub).
+1. In the admin **Publish** tab, click **Download data.js** — it
+   downloads the `data.js` file with your changes.
+2. Replace `data.js` in your repo with it (or drag the file into GitHub).
 3. Commit. GitHub Pages rebuilds and everyone sees the update.
-
-With a GitHub token configured in **Settings**, **Publish to GitHub** uploads
-the media files and `data.js` automatically.
 
 ## Structure
 

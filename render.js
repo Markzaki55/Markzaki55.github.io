@@ -795,21 +795,10 @@ function renderContact() {
   if (emailText && email) {
     emailText.textContent = email;
     emailText.href = "mailto:" + email;
-  } else if (emailText) {
-    var fallback = document.getElementById("contact-fallback");
-    if (fallback) fallback.style.display = "none";
   }
 
   var form = document.getElementById("contact-form");
-  var fallback = document.getElementById("contact-fallback");
-  var hasKey = PROFILE.contactForm && PROFILE.contactForm.accessKey && PROFILE.contactForm.accessKey.trim();
-
-  if (!hasKey) {
-    if (form) form.style.display = "none";
-    if (fallback) fallback.style.display = "none";
-  }
-
-  if (form && hasKey) {
+  if (form) {
     var status = document.getElementById("form-status");
     var btn = form.querySelector(".contact-form__submit");
     var originalBtnHtml = btn ? btn.innerHTML : "";
@@ -817,7 +806,6 @@ function renderContact() {
     form.addEventListener("submit", function(e) {
       e.preventDefault();
       var formData = new FormData(form);
-      formData.append("access_key", PROFILE.contactForm.accessKey.trim());
       var senderName = formData.get("name") || "someone";
       formData.set("subject", "Portfolio contact from " + senderName);
       if (btn) { btn.disabled = true; btn.textContent = "Sending\u2026"; }
