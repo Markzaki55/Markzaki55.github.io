@@ -564,30 +564,54 @@ video {
 }
 
 .contact__simple .section__head {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
-
-.contact__email {
-  margin-top: 30px;
-}
-
-.contact__email-show {
-  margin-top: 8px;
-  font-size: 14px;
-  color: var(--muted);
-  letter-spacing: 0.5px;
-  font-family: var(--font-mono);
-}
-
-/* Contact form */
 
 .contact-form {
   width: 100%;
   max-width: 480px;
-  margin-top: 24px;
+  margin-top: 28px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.contact__or {
+  margin-top: 28px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--faint);
+}
+
+.contact__email-copy {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .2s ease;
+  padding: 6px 14px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  display: inline-block;
+}
+
+.contact__email-copy:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.contact__email-copy[data-state="copied"] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.contact__email-hint {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--faint);
+  letter-spacing: 0.5px;
 }
 
 .contact-form__row {
@@ -648,22 +672,6 @@ video {
   position: absolute;
   opacity: 0;
   pointer-events: none;
-}
-
-.contact__fallback {
-  margin-top: 18px;
-  font-size: 14px;
-  color: var(--faint);
-}
-
-.contact__email-text {
-  color: var(--muted);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.contact__email-text:hover {
-  color: var(--text);
 }
 
 .socials {

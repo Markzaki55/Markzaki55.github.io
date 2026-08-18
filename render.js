@@ -784,24 +784,24 @@ function renderContact() {
   if (about && PROFILE.about) about.textContent = PROFILE.about;
 
   var email = (PROFILE.links.email || "").replace(/^mailto:/, "").trim();
-  var emailBtn = document.getElementById("contact-email");
-  var emailShow = document.getElementById("contact-email-show");
+  var emailCopy = document.getElementById("contact-email-copy");
+  var emailHint = document.getElementById("contact-email-hint");
 
-  if (emailBtn && email) {
-    emailBtn.addEventListener("click", function() {
+  if (emailCopy && email) {
+    emailCopy.textContent = email;
+    emailCopy.addEventListener("click", function() {
       navigator.clipboard.writeText(email).then(function() {
-        emailBtn.textContent = "Copied!";
-        setTimeout(function() { emailBtn.innerHTML = "Copy email <span class='arrow'>&#8594;</span>"; }, 2000);
+        emailCopy.dataset.state = "copied";
+        if (emailHint) emailHint.textContent = "copied!";
+        setTimeout(function() {
+          emailCopy.dataset.state = "";
+          if (emailHint) emailHint.textContent = "click to copy";
+        }, 2000);
       });
     });
-  } else if (emailBtn) {
-    emailBtn.style.display = "none";
-  }
-
-  if (emailShow && email) {
-    emailShow.textContent = email;
-  } else if (emailShow) {
-    emailShow.style.display = "none";
+  } else if (emailCopy) {
+    emailCopy.style.display = "none";
+    if (emailHint) emailHint.style.display = "none";
   }
 
   var form = document.getElementById("contact-form");
