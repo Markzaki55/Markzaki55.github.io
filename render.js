@@ -785,16 +785,23 @@ function renderContact() {
 
   var email = (PROFILE.links.email || "").replace(/^mailto:/, "").trim();
   var emailBtn = document.getElementById("contact-email");
+  var emailShow = document.getElementById("contact-email-show");
+
   if (emailBtn && email) {
-    emailBtn.href = "mailto:" + email;
+    emailBtn.addEventListener("click", function() {
+      navigator.clipboard.writeText(email).then(function() {
+        emailBtn.textContent = "Copied!";
+        setTimeout(function() { emailBtn.innerHTML = "Copy email <span class='arrow'>&#8594;</span>"; }, 2000);
+      });
+    });
   } else if (emailBtn) {
     emailBtn.style.display = "none";
   }
 
-  var emailText = document.getElementById("contact-email-text");
-  if (emailText && email) {
-    emailText.textContent = email;
-    emailText.href = "mailto:" + email;
+  if (emailShow && email) {
+    emailShow.textContent = email;
+  } else if (emailShow) {
+    emailShow.style.display = "none";
   }
 
   var form = document.getElementById("contact-form");
