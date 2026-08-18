@@ -780,27 +780,80 @@ const SOCIAL_ICONS = {
 };
 
 function renderContact() {
-  const about = document.getElementById("about-text");
+  var about = document.getElementById("about-text");
   if (about && PROFILE.about) about.textContent = PROFILE.about;
 
-  const email = document.getElementById("contact-email");
-  if (email) {
-    if (PROFILE.links.email) email.href = PROFILE.links.email.trim();
-    else email.style.display = "none";
+  var email = (PROFILE.links.email || "").replace(/^mailto:/, "").trim();
+  var emailBtn = document.getElementById("contact-email");
+  if (emailBtn && email) {
+    emailBtn.href = "mailto:" + email;
+  } else if (emailBtn) {
+    emailBtn.style.display = "none";
   }
 
-  const socials = document.getElementById("socials");
+  var emailText = document.getElementById("contact-email-text");
+  if (emailText && email) {
+    emailText.textContent = email;
+    emailText.href = "mailto:" + email;
+  } else if (emailText) {
+    var fallback = document.getElementById("contact-fallback");
+    if (fallback) fallback.style.display = "none";
+  }
+
+  var form = document.getElementById("contact-form");
+  var fallback = document.getElementById("contact-fallback");
+  var hasKey = PROFILE.contactForm && PROFILE.contactForm.accessKey && PROFILE.contactForm.accessKey.trim();
+
+  if (!hasKey) {
+    if (form) form.style.display = "none";
+    if (fallback) fallback.style.display = "none";
+  }
+
+  if (form && hasKey) {
+    var status = document.getElementById("form-status");
+    var btn = form.querySelector(".contact-form__submit");
+    var originalBtnHtml = btn ? btn.innerHTML : "";
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      var formData = new FormData(form);
+      formData.append("access_key", PROFILE.contactForm.accessKey.trim());
+      var senderName = formData.get("name") || "someone";
+      formData.set("subject", "Portfolio contact from " + senderName);
+      if (btn) { btn.disabled = true; btn.textContent = "Sending\u2026"; }
+      if (status) { status.textContent = ""; status.className = "contact-form__status"; }
+
+      fetch("https://api.web3forms.com/submit", { method: "POST", body: formData })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.success) {
+            if (status) { status.textContent = "Message sent. I will get back to you soon."; status.className = "contact-form__status contact-form__status--ok"; }
+            form.reset();
+          } else {
+            if (status) { status.textContent = d.message || "Something went wrong."; status.className = "contact-form__status contact-form__status--err"; }
+          }
+        })
+        .catch(function() {
+          if (status) { status.textContent = "Something went wrong. Try again or email me directly."; status.className = "contact-form__status contact-form__status--err"; }
+        })
+        .finally(function() {
+          if (btn) { btn.disabled = false; btn.innerHTML = originalBtnHtml; }
+        });
+    });
+  }
+
+  var socials = document.getElementById("socials");
   if (socials) {
-    const L = PROFILE.links;
-    const items = [
+    var L = PROFILE.links;
+    var items = [
       L.github   && { label: "GitHub",   url: L.github,   icon: SOCIAL_ICONS.github },
       L.linkedin && { label: "LinkedIn", url: L.linkedin, icon: SOCIAL_ICONS.linkedin },
       L.resume   && { label: "Resume",   url: L.resume,   icon: SOCIAL_ICONS.doc },
     ].filter(Boolean);
-    items.forEach((it) => {
-      const a = el("a", "social");
+    items.forEach(function(it) {
+      var a = el("a", "social");
       a.href = it.url;
-      a.innerHTML = it.icon + `<span>${esc(it.label)}</span>`;
+      a.innerHTML = it.icon + "<span>" + esc(it.label) + "</span>";
       if (isExternal(it.url)) { a.target = "_blank"; a.rel = "noopener"; }
       socials.appendChild(a);
     });

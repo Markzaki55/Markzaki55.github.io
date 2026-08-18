@@ -3,3 +3,6 @@
 #   git rm --cached admin.html admin.css
 admin.html
 admin.css
+
+# Internal documentation — not deployed.
+PORTFOLIO-DOCS.md
