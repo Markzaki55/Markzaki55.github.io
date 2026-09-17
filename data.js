@@ -258,7 +258,21 @@ const PROJECTS = [
       }
     ],
     "gallery": [],
-    "links": []
+    "links": [
+      {
+        "text": "App Store",
+        "url": "https://apps.apple.com/ua/app/%D8%A7%D9%84%D9%85%D9%84%D8%A7%D8%B2%D9%85-%D8%A7%D9%86%D8%B3-%D8%A7%D9%85%D9%86-%D8%A7%D9%84%D8%B7%D8%B1%D9%82/id1636067844",
+        "accent": true
+      },
+      {
+        "text": "Google Play",
+        "url": "https://play.google.com/store/apps/details?id=com.almulazimanas.almulazimanas&hl=ar"
+      },
+      {
+        "text": "Official Website",
+        "url": "https://mlzmanas.com/"
+      }
+    ]
   },
   {
     "id": "rd3",
