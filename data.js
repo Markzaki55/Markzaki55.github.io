@@ -115,6 +115,69 @@ const THEME = {
 
 const PROJECTS = [
   {
+    "id": "voodoo-you-chasing",
+    "title": "Voodoo You Chasing?",
+    "subtitle": "Steam Multiplayer Game · Gameplay & Multiplayer Programmer",
+    "tagline": "Voodoo You Chasing? is a freeze tag game but someone brought magic and bad decision-making. Play as a Wizard: collect glyphs to complete the ritual. Or be the Voodoo Hunter: capture them all to protect your mojo.",
+    "tags": [
+      "Unity",
+      "FishNet",
+      "Multiplayer",
+      "System Design"
+    ],
+    "featured": true,
+    "cover": {
+      "type": "image",
+      "label": "VOODOO",
+      "sub": "You Chasing? · Party PvP",
+      "src": "assets/media/voodoo-you-chasing-cover.png"
+    },
+    "role": "Gameplay & Multiplayer Programmer",
+    "timeline": "In Development · Launching 2026",
+    "techStack": "Unity, C#, FishNet, FishySteamworks, Steamworks, UniTask, Opus voice chat",
+    "media": [],
+    "sections": [
+      {
+        "heading": "Overview",
+        "body": "Voodoo You Chasing? is a 3-5 player online party game where wizards race glyphs to complete a ritual while a single Voodoo Hunter tries to catch every one of them. Built with Radiant Undead, where I was the sole programmer — owning gameplay, multiplayer networking, and technical design end to end.",
+        "list": [
+          "Wizard vs Voodoo Hunter roles",
+          "Objective-based gameplay",
+          "Permanent elimination — caught wizards spectate as spirits",
+          "Match length scales with player count"
+        ]
+      },
+      {
+        "heading": "Multiplayer Architecture",
+        "body": "Fully server-authoritative multiplayer on FishNet, with FishySteamworks handling Steam transport and friends-list lobby invites. Every gameplay value — movement, ability use, glyph pickups, deliveries, match results — is validated and owned by the server, so no client can influence the outcome."
+      },
+      {
+        "heading": "Networked Ability System",
+        "body": "Every ability is a modular, data-driven assembly of reusable modules that replicate over the network. The effect and status-effect systems follow the same pattern, so a single effect can apply to one character and propagate onto others. New abilities and statuses are composed from existing modules and tuned by design rather than written in code."
+      },
+      {
+        "heading": "Generic Match Rules",
+        "body": "The entire match loop runs on a generic, configurable rules framework. Round timing, objectives, scoring, and win/lose conditions are defined as rules rather than hard-coded, so the same framework adapts to new modes through tuning instead of new code."
+      },
+      {
+        "heading": "UI Framework",
+        "body": "Player-facing UI — menus, HUD, ability feedback, room flow — is built on a reusable MVP framework, with views decoupled from the state logic behind them so screens are quick to add and safe to extend as the game grows."
+      },
+      {
+        "heading": "Voice Chat",
+        "body": "Custom in-game voice chat is designed into the networked session. UniTask handles the async audio pipeline while Opus compresses the stream, keeping teams talking without a third-party voice service."
+      }
+    ],
+    "gallery": [],
+    "links": [
+      {
+        "text": "View on Steam",
+        "url": "https://store.steampowered.com/app/5235780/Voodoo_You_Chasing/",
+        "accent": true
+      }
+    ]
+  },
+  {
     "id": "al-molazem",
     "title": "Al Molazem Ans",
     "subtitle": "Shipped Mobile Game · Programming Lead",
