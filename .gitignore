@@ -6,3 +6,12 @@ admin.css
 
 # Internal documentation — not deployed.
 PORTFOLIO-DOCS.md
+
+# Original Voodoo source media stays local; optimized derivatives are published.
+/assets/media/voodoo 2.png
+/assets/media/voodoo 3.png
+/assets/media/voodoo you chasing vid.mp4
+
+# Local publishing bundle and extraction instructions.
+/portfolio-publish.zip
+/PUBLISH.txt

@@ -33,30 +33,38 @@ function isPublishableProject(p) {
    edits show up live in this browser before they are exported and committed.
    ---------------------------------------------------------------------- */
 const DRAFT_KEY = "mzPortfolioDraft";
-const DRAFT_DB_NAME = "mzPortfolioStudio";
 const DRAFT_STORE = "drafts";
+const IS_STUDIO_PREVIEW = new URLSearchParams(location.search).get("studio") === "1";
+let studioMediaStore;
 
-function loadDraftFromDb() {
-  return new Promise((resolve) => {
-    if (!window.indexedDB) { resolve(null); return; }
-    const request = indexedDB.open(DRAFT_DB_NAME, 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(DRAFT_STORE)) db.createObjectStore(DRAFT_STORE);
-    };
-    request.onerror = () => resolve(null);
-    request.onsuccess = () => {
-      const db = request.result;
+function loadStudioMediaStore() {
+  if (window.PortfolioMedia) return Promise.resolve(window.PortfolioMedia);
+  if (!studioMediaStore) studioMediaStore = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "media-store.js?v=20261011-6";
+    script.onload = () => resolve(window.PortfolioMedia);
+    script.onerror = () => reject(new Error("Could not load local preview media."));
+    document.head.appendChild(script);
+  });
+  return studioMediaStore;
+}
+
+async function loadDraftFromDb() {
+  try {
+    const store = await loadStudioMediaStore();
+    const db = await store.openDb();
+    return await new Promise((resolve) => {
       const tx = db.transaction(DRAFT_STORE, "readonly");
       const get = tx.objectStore(DRAFT_STORE).get(DRAFT_KEY);
       get.onsuccess = () => resolve(get.result || null);
       get.onerror = () => resolve(null);
       tx.oncomplete = () => db.close();
-    };
-  });
+    });
+  } catch (_) { return null; }
 }
 
 async function loadDraft() {
+  if (!IS_STUDIO_PREVIEW) return null;
   const largeDraft = await loadDraftFromDb();
   if (largeDraft) return largeDraft;
   try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); }
@@ -66,6 +74,11 @@ async function loadDraft() {
 async function hydrateFromDraft() {
   const d = await loadDraft();
   if (!d) return;
+  const contentDefaults = {
+    PROFILE: JSON.parse(JSON.stringify(PROFILE)),
+    PROJECTS: JSON.parse(JSON.stringify(PROJECTS)),
+  };
+  const savedContentVersion = d.PROFILE && d.PROFILE.contentVersion;
   const themeDefaults = typeof THEME !== "undefined"
     ? JSON.parse(JSON.stringify(THEME))
     : null;
@@ -134,6 +147,22 @@ async function hydrateFromDraft() {
     PROJECTS.length = 0;
     d.PROJECTS.forEach((p) => PROJECTS.push(p));
   }
+  migratePortfolioContent(PROFILE, PROJECTS, contentDefaults, savedContentVersion);
+}
+
+async function resolveMediaSource(source) {
+  if (!String(source || "").startsWith("upload:")) return source || "";
+  if (!IS_STUDIO_PREVIEW) throw new Error("This media has not been published yet.");
+  const store = await loadStudioMediaStore();
+  return store.resolve(source);
+}
+
+function assignMediaSource(element, source, property = "src") {
+  if (!String(source || "").startsWith("upload:")) element[property] = source || "";
+  else resolveMediaSource(source).then((url) => { element[property] = url; }).catch(() => {
+    element.title = "Preview file unavailable. Re-upload it in the studio.";
+  });
+  return element;
 }
 
 /* Map THEME keys -> CSS custom properties, and apply them to :root. */
@@ -267,14 +296,12 @@ function media(m) {
   switch (m.type) {
     case "image": {
       const img = document.createElement("img");
-      img.src = m.src; img.alt = m.alt || ""; img.loading = "lazy";
+      assignMediaSource(img, m.src); img.alt = m.alt || ""; img.loading = "lazy";
+      img.decoding = "async";
       return img;
     }
     case "video": {
-      const v = document.createElement("video");
-      v.src = m.src; if (m.poster) v.poster = m.poster;
-      v.controls = true; v.preload = "metadata"; v.playsInline = true;
-      return v;
+      return videoPlayer(m);
     }
     case "youtube": {
       if (!m.id) return el("div", "ph", `<span class="ph__sub">Missing YouTube ID</span>`);
@@ -301,6 +328,44 @@ function media(m) {
   }
 }
 
+function videoPlayer(m) {
+  const wrap = el("div", "video-player");
+  const video = document.createElement("video");
+  video.preload = "none";
+  video.playsInline = true;
+  video.setAttribute("aria-label", mediaLabel(m) || "Project video");
+  if (m.poster) assignMediaSource(video, m.poster, "poster");
+  const play = el("button", "video-player__play", `${PLAY_ICON}<span>Play video</span>`);
+  play.type = "button";
+  play.setAttribute("aria-label", `Play ${mediaLabel(m) || "project video"}`);
+  play.addEventListener("click", async () => {
+    play.disabled = true;
+    try {
+      const source = await resolveMediaSource(m.src);
+      if (!wrap.isConnected) return;
+      video.src = source;
+      video.controls = true;
+      await video.play();
+      play.hidden = true;
+    } catch (_) {
+      play.disabled = false;
+      play.querySelector("span").textContent = "Retry video";
+    }
+  });
+  video.addEventListener("error", () => {
+    play.hidden = false; play.disabled = false;
+    play.querySelector("span").textContent = "Retry video";
+  });
+  wrap.append(video, play);
+  return wrap;
+}
+
+function stopMedia(root) {
+  root.querySelectorAll("video").forEach((video) => {
+    video.pause(); video.removeAttribute("src"); video.load();
+  });
+}
+
 /* ----------------------------------------------------------------------
    MEDIA GALLERY (Unity Asset Store style)
    A big main stage + a strip of clickable thumbnails. Featured item first.
@@ -311,13 +376,13 @@ function mediaThumb(m) {
   switch (m.type) {
     case "image": {
       const img = document.createElement("img");
-      img.src = m.src; img.alt = m.alt || ""; img.loading = "lazy";
+      assignMediaSource(img, m.src); img.alt = m.alt || ""; img.loading = "lazy";
       return img;
     }
     case "video": {
       if (m.poster) {
         const img = document.createElement("img");
-        img.src = m.poster; img.alt = m.label || ""; img.loading = "lazy";
+        assignMediaSource(img, m.poster); img.alt = m.label || ""; img.loading = "lazy";
         return img;
       }
       return el("div", "thumb__ph", `<span>${esc(m.label || "Video")}</span>`);
@@ -374,6 +439,7 @@ function mediaGallery(items) {
   const goto = (n) => {
     idx = (n + ordered.length) % ordered.length;
     const m = ordered[idx];
+    stopMedia(frame);
     frame.innerHTML = "";
     frame.appendChild(media(m));
     const label = mediaLabel(m);
@@ -404,7 +470,7 @@ function mediaGallery(items) {
     box.appendChild(thumbs);
   }
 
-  expand.addEventListener("click", () => openLightbox(ordered, idx));
+  expand.addEventListener("click", () => { stopMedia(frame); openLightbox(ordered, idx); });
   box.addEventListener("keydown", (e) => {
     if (e.key === "ArrowRight") { e.preventDefault(); goto(idx + 1); }
     else if (e.key === "ArrowLeft") { e.preventDefault(); goto(idx - 1); }
@@ -440,12 +506,14 @@ function openLightbox(items, startIndex) {
 
   const show = () => {
     i = (i + items.length) % items.length;
+    stopMedia(frame);
     frame.innerHTML = "";
     frame.appendChild(media(items[i]));
     const label = mediaLabel(items[i], i);
     cap.textContent = single ? label : `${label}  ·  ${i + 1} / ${items.length}`;
   };
   const done = () => {
+    stopMedia(frame);
     document.removeEventListener("keydown", onKey);
     document.body.style.overflow = previousOverflow;
     ov.remove();
@@ -498,8 +566,8 @@ function renderHome() {
   PROFILE.pillars.forEach((p, idx) => {
     const card = el("div", "pillar");
     card.appendChild(el("div", "pillar__num number-label", String(idx + 1).padStart(2, "0")));
-    card.appendChild(el("div", "pillar__title", esc(p.title)));
-    card.appendChild(el("div", "pillar__body", esc(p.body)));
+    card.appendChild(el("h3", "pillar__title", esc(p.title)));
+    card.appendChild(el("p", "pillar__body", esc(p.body)));
     pillars.appendChild(card);
   });
 
@@ -548,7 +616,7 @@ function projectSource() {
 }
 
 function projectHref(id, source = projectSource()) {
-  return `project.html?id=${encodeURIComponent(id)}&from=${encodeURIComponent(source)}`;
+  return `project.html?id=${encodeURIComponent(id)}&from=${encodeURIComponent(source)}${IS_STUDIO_PREVIEW ? "&studio=1" : ""}`;
 }
 
 function projectCard(p) {
@@ -558,16 +626,10 @@ function projectCard(p) {
   card.dataset.tags = (p.tags || []).map((t) => t.toLowerCase()).join("|");
 
   const m = el("div", "pcard__media");
-  const cover = media(p.cover);
-  if (cover.tagName === "VIDEO") {
-    cover.controls = false;
-    cover.autoplay = true;
-    cover.muted = true;
-    cover.loop = true;
-    cover.playsInline = true;
-    cover.setAttribute("aria-hidden", "true");
-  }
+  const cover = p.cover && isPlayable(p.cover) ? mediaThumb(p.cover) : media(p.cover);
   m.appendChild(cover);
+  const preview = cardPreviewVideo(p);
+  if (preview) setupCardPreview(card, m, preview);
   card.appendChild(m);
 
   const body = el("div", "pcard__body");
@@ -587,6 +649,85 @@ function projectCard(p) {
   card.appendChild(body);
   return card;
 }
+
+const PREVIEW_MAX_BYTES = 3 * 1024 * 1024;
+function cardPreviewVideo(project) {
+  if (project.cardPreview && project.cardPreview.enabled === false) return null;
+  const config = project.cardPreview;
+  const candidate = config
+    ? config.video || (project.media || []).find((item) => item.mediaId === config.mediaId)
+    : project.cover && project.cover.type === "video" ? project.cover : null;
+  // Unknown or large sources remain posters; avoid fetching full trailers on hover.
+  return candidate && candidate.type === "video" && candidate.src && candidate.bytes > 0 && candidate.bytes <= PREVIEW_MAX_BYTES
+    ? candidate : null;
+}
+
+let activeCardPreview;
+const previewStops = new Set();
+function setupCardPreview(card, frame, source) {
+  const video = document.createElement("video");
+  video.className = "pcard__preview";
+  video.muted = true; video.defaultMuted = true; video.loop = true;
+  video.playsInline = true; video.preload = "none";
+  video.setAttribute("aria-hidden", "true");
+  frame.appendChild(video);
+  let timer, generation = 0, interested = false;
+  const motion = matchMedia("(prefers-reduced-motion: reduce)");
+  const finePointer = matchMedia("(hover: hover) and (pointer: fine)");
+  const connection = navigator.connection;
+  const allowed = () => !motion.matches && finePointer.matches && !document.hidden &&
+    !(connection && (connection.saveData || /^(slow-)?2g$/.test(connection.effectiveType)));
+  const stop = () => {
+    interested = false; generation++; clearTimeout(timer);
+    frame.classList.remove("is-previewing");
+    video.pause();
+    if (video.hasAttribute("src")) { video.removeAttribute("src"); video.load(); }
+    if (activeCardPreview === stop) activeCardPreview = null;
+  };
+  const start = () => {
+    if (!allowed()) return;
+    interested = true;
+    clearTimeout(timer);
+    const token = ++generation;
+    timer = setTimeout(async () => {
+      if (!interested || token !== generation || !allowed()) return;
+      if (activeCardPreview && activeCardPreview !== stop) activeCardPreview();
+      activeCardPreview = stop;
+      try {
+        const url = await resolveMediaSource(source.src);
+        if (!interested || token !== generation || !allowed()) return;
+        video.src = url;
+        await video.play();
+        if (interested && token === generation) frame.classList.add("is-previewing");
+      } catch (_) { if (token === generation) stop(); }
+    }, 180);
+  };
+  card.addEventListener("pointerenter", start);
+  card.addEventListener("pointerleave", stop);
+  card.addEventListener("focus", start);
+  card.addEventListener("blur", stop);
+  card.addEventListener("click", stop);
+  card.addEventListener("keydown", (event) => { if (event.key === "Escape") stop(); });
+  video.addEventListener("error", stop);
+  motion.addEventListener("change", stop);
+  connection?.addEventListener?.("change", stop);
+  previewStops.add(stop);
+  if ("IntersectionObserver" in window) {
+    cardPreviewObserver.observe(card);
+    card._stopPreview = stop;
+  }
+}
+
+const cardPreviewObserver = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
+  entries.forEach((entry) => { if (!entry.isIntersecting) entry.target._stopPreview?.(); });
+}) : null;
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    previewStops.forEach((stop) => stop());
+    document.querySelectorAll("video").forEach((video) => video.pause());
+  }
+});
+window.addEventListener("pagehide", () => previewStops.forEach((stop) => stop()));
 
 /* ======================================================================
    ALL PROJECTS PAGE

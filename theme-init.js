@@ -1,6 +1,7 @@
 /* Apply the small admin draft theme before CSS paints the page. */
 (function () {
   "use strict";
+  if (new URLSearchParams(location.search).get("studio") !== "1") return;
 
   var THEME_KEY = "mzPortfolioDraftTheme";
   var THEME_VARS = {

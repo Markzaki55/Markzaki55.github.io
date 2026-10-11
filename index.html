@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#101010">
-  <script src="theme-init.js"></script>
+  <script src="theme-init.js?v=20261011-6"></script>
   <title>Mark Zaki</title>
   <meta name="description" content="Mark Zaki, a Gameplay & Multiplayer Systems Programmer working across shipped mobile games, multiplayer systems, VR, combat, AI, and developer tools.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif&family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261011-6">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 
   <!-- Social link preview -->
@@ -48,9 +48,8 @@
         <div class="section__head">
           <div>
             <span class="section__index number-label">01 / Expertise</span>
-            <h2 class="section__title">What I care about.</h2>
+            <h2 class="section__title">What I build.</h2>
           </div>
-          <p class="section__note">The parts of game development I enjoy thinking about, building, and improving.</p>
         </div>
         <div class="pillars" id="pillars"></div>
         <div class="coretools">
@@ -67,7 +66,6 @@
             <span class="section__index number-label">02 / Work</span>
             <h2 class="section__title">Featured projects.</h2>
           </div>
-          <p class="section__note">A closer look at the games and systems I have been building.</p>
         </div>
         <div class="projgrid" id="projects"></div>
         <div class="allprojects" id="all-projects" style="display:none">
@@ -91,15 +89,15 @@
           <input type="hidden" name="access_key" value="aaf80370-3ba7-458b-8931-5a05beeeeef8">
           <input type="checkbox" name="botcheck" class="hidden-check" tabindex="-1" autocomplete="off">
           <div class="contact-form__row">
-            <input class="contact-form__input" type="text" name="name" placeholder="Your name" required>
-            <input class="contact-form__input" type="email" name="email" placeholder="Your email" required>
+            <label class="contact-form__field"><span>Your name</span><input class="contact-form__input" type="text" name="name" autocomplete="name" required></label>
+            <label class="contact-form__field"><span>Email</span><input class="contact-form__input" type="email" name="email" autocomplete="email" required></label>
           </div>
-          <textarea class="contact-form__input contact-form__textarea" name="message" placeholder="What's on your mind?" rows="4" required></textarea>
+          <label class="contact-form__field"><span>Message</span><textarea class="contact-form__input contact-form__textarea" name="message" placeholder="Tell me about your project." rows="4" required></textarea></label>
           <button class="btn btn--accent contact-form__submit" type="submit">Send message <span class="arrow">&#8594;</span></button>
           <p class="contact-form__status" id="form-status"></p>
         </form>
         <p class="contact__or">or</p>
-        <p class="contact__email-copy" id="contact-email-copy">markzakimalakzaki@gmail.com</p>
+        <button type="button" class="contact__email-copy" id="contact-email-copy" aria-label="Copy email address">markzakimalakzaki@gmail.com</button>
         <p class="contact__email-hint" id="contact-email-hint">click to copy</p>
         <div class="socials" id="socials"></div>
       </div>
@@ -116,7 +114,8 @@
     </div>
   </footer>
 
-  <script src="data.js"></script>
-  <script src="render.js"></script>
+  <script src="data.js?v=20261011-6"></script>
+  <script src="content-migration.js?v=20261011-6"></script>
+  <script src="render.js?v=20261011-6"></script>
 </body>
 </html>
